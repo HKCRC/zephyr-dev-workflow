@@ -8,5 +8,10 @@
 
 ## 3.3.0
 
-- Rename repository to `craner-zephyr-project-tool`.
+- Rename repository to an intermediate project-tool name.
 - Rename `scripts` directory to `script`.
+
+## 3.4.0
+
+- Rename repository to `zephyr-build-flash-ota`.
+- Remove project/company naming from the shared tool.

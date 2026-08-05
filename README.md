@@ -1,6 +1,6 @@
-# craner-zephyr-project-tool
+# zephyr-build-flash-ota
 
-Shared PowerShell tools for Craner Zephyr firmware projects.
+Shared PowerShell script for Zephyr firmware build, flash, and OTA workflows.
 
 ## Scripts
 
