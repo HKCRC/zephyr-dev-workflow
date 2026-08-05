@@ -27,3 +27,8 @@ Use the dispatcher from a firmware project root:
 Project-specific values stay in each firmware repository's
 `project_config.json`. The script resolves relative paths from that config
 file's directory, so this repository can be used as a Git submodule.
+
+## Documents
+
+- `doc/command-table.md`: command and parameter reference for build, flash,
+  OTA, and MCUboot image management workflows.
