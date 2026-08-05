@@ -1,4 +1,4 @@
-# Version: 3.2.0
+# Version: 3.4.0
 param(
     [string]$Config = "",
     [string]$Board = "",
@@ -12,7 +12,7 @@ param(
     [switch]$Version
 )
 
-$ScriptVersion = "3.2.0"
+$ScriptVersion = "3.4.0"
 if ($Version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
