@@ -1,4 +1,4 @@
-# Version: 3.5.0
+# Version: 3.6.0
 param(
     [string]$Config = "",
     [string]$Address = "",
@@ -9,7 +9,7 @@ param(
     [switch]$Version
 )
 
-$ScriptVersion = "3.5.0"
+$ScriptVersion = "3.6.0"
 if ($Version) {
     Write-Host "image_comfirm.ps1 version $ScriptVersion"
     exit 0

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.6.0
+
+- Add `script/dev.ps1` as the shared workflow dispatcher.
+- Standardize project usage around a single root `dev.ps1` entry point.
+
 ## 3.5.0
 
 - Rename repository to `zephyr-dev-workflow`.

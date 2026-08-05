@@ -1,4 +1,4 @@
-# Version: 3.5.0
+# Version: 3.6.0
 param(
     [string]$Config = "",
     [string]$Board = "",
@@ -14,7 +14,7 @@ param(
     [switch]$Version
 )
 
-$ScriptVersion = "3.5.0"
+$ScriptVersion = "3.6.0"
 if ($Version) {
     Write-Host "ota.ps1 version $ScriptVersion"
     exit 0
@@ -181,5 +181,5 @@ Write-Host "Resetting device to switch to the new firmware..."
 Invoke-McuMgr @("--conntype", $ConnType, "--connstring", $connString, "reset") | Out-Null
 
 Write-Host "OTA requested. After the new firmware boots and passes validation, run:"
-Write-Host "  .\image_comfirm.ps1 -Address $Address -Port $Port"
+Write-Host "  .\dev.ps1 image-confirm -Address $Address -Port $Port"
 exit 0

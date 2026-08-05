@@ -1,4 +1,4 @@
-# Version: 3.5.0
+# Version: 3.6.0
 param(
     [string]$Config = "",
     [string]$Board = "",
@@ -12,7 +12,7 @@ param(
     [switch]$Version
 )
 
-$ScriptVersion = "3.5.0"
+$ScriptVersion = "3.6.0"
 if ($Version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
@@ -38,7 +38,7 @@ $env:ZEPHYR_SDK_INSTALL_DIR = Resolve-ProjectPath (Expand-ProjectConfigValue (Re
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
 
 if (-not (Test-Path $buildDir)) {
-    Write-Error "Build directory not found: $buildDir. Run .\build.ps1 -Board $Board first."
+    Write-Error "Build directory not found: $buildDir. Run .\dev.ps1 build -Board $Board first."
     exit 1
 }
 
@@ -46,7 +46,7 @@ function Require-File {
     param([string]$Path)
 
     if (-not (Test-Path $Path)) {
-        Write-Error "Required image not found: $Path. Run .\build.ps1 -Board $Board first."
+        Write-Error "Required image not found: $Path. Run .\dev.ps1 build -Board $Board first."
         exit 1
     }
 }

@@ -2,8 +2,22 @@
 
 Shared PowerShell scripts for Zephyr firmware development workflows.
 
+## Entry Point
+
+Use the dispatcher from a firmware project root:
+
+```powershell
+.\dev.ps1 build
+.\dev.ps1 build -Pristine
+.\dev.ps1 flash
+.\dev.ps1 ota
+.\dev.ps1 image-list
+.\dev.ps1 image-confirm
+```
+
 ## Scripts
 
+- `script/dev.ps1`: dispatch workflow commands to the scripts below.
 - `script/build.ps1`: build a Zephyr sysbuild project.
 - `script/flash.ps1`: flash by west runner or STM32CubeProgrammer.
 - `script/ota.ps1`: upload an MCUboot/mcumgr OTA image.
