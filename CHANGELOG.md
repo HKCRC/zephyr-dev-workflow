@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.5.0
+
+- Rename repository to `zephyr-dev-workflow`.
+- Publish as `HKCRC/zephyr-dev-workflow`.
+
 ## 3.2.0
 
 - Extract script for shared submodule use.

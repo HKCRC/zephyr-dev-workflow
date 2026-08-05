@@ -1,6 +1,6 @@
-# zephyr-build-flash-ota
+# zephyr-dev-workflow
 
-Shared PowerShell script for Zephyr firmware build, flash, and OTA workflows.
+Shared PowerShell scripts for Zephyr firmware development workflows.
 
 ## Scripts
 
