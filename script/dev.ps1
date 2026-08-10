@@ -1,5 +1,5 @@
-# Version: 3.7.0
-$ScriptVersion = "3.7.0"
+# Version: 3.8.0
+$ScriptVersion = "3.8.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
@@ -11,6 +11,7 @@ function Show-Help {
     Write-Host "  build          Build the Zephyr sysbuild project."
     Write-Host "  flash          Flash firmware by west runner or STM32CubeProgrammer."
     Write-Host "  ota            Upload and test an MCUboot OTA image."
+    Write-Host "  reset          Reset device by mcumgr."
     Write-Host "  image_list     List MCUboot images by mcumgr."
     Write-Host "  image_confirm  Confirm the active MCUboot image."
     Write-Host ""
@@ -131,6 +132,9 @@ switch -CaseSensitive ($command) {
     }
     "ota" {
         Invoke-WorkflowCommand -ScriptName "ota.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "address", "port", "conn_type", "mcu_mgr", "image_path") -SwitchNames @("skip_upload", "skip_reset", "dry_run", "raw_upload_output", "version")
+    }
+    "reset" {
+        Invoke-WorkflowCommand -ScriptName "reset.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
     }
     "image_list" {
         Invoke-WorkflowCommand -ScriptName "image_list.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("version")

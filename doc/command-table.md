@@ -19,6 +19,7 @@
 | `.\dev.ps1 build` | 编译 Zephyr sysbuild 工程。 |
 | `.\dev.ps1 flash` | 烧录固件。 |
 | `.\dev.ps1 ota` | 执行 MCUboot/mcumgr OTA。 |
+| `.\dev.ps1 reset` | 通过 mcumgr 重启设备。 |
 | `.\dev.ps1 image_list` | 查询 MCUboot 镜像列表。 |
 | `.\dev.ps1 image_confirm` | 确认当前运行镜像有效。 |
 
@@ -140,6 +141,30 @@
 | 4 | 如果 signed hex 存在，复制到 `Ota.OtaUpdateHexPath`。 |
 | 5 | 使用 `Ota.OtaUpdateBinPath` 作为上传镜像。 |
 
+## reset
+
+```powershell
+.\dev.ps1 reset [-address <ip-or-host>] [-port <port>] [-conn_type <type>] [-mcu_mgr <path>] [-dry_run] [-config <path>] [-version]
+```
+
+| 参数 | 类型 | 默认值来源 | 说明 |
+| --- | --- | --- | --- |
+| `-address <ip-or-host>` | 字符串 | `Ota.Address` | 设备地址。 |
+| `-port <port>` | 整数 | `Ota.Port` | mcumgr 端口。 |
+| `-conn_type <type>` | 字符串 | `Ota.ConnType` | mcumgr 连接类型。 |
+| `-mcu_mgr <path>` | 字符串 | `Ota.McuMgr` | mcumgr 命令或完整路径。 |
+| `-dry_run` | 开关 | 关闭 | 只打印 reset 命令，不实际重启设备。 |
+| `-config <path>` | 字符串 | 项目根目录 `project_config.json` | 指定项目配置文件。 |
+| `-version` | 开关 | 关闭 | 显示 reset 脚本版本。 |
+
+示例：
+
+```powershell
+.\dev.ps1 reset
+.\dev.ps1 reset -dry_run
+.\dev.ps1 reset -address 192.168.101.36 -port 1337
+```
+
 ## image_list
 
 ```powershell
@@ -216,6 +241,7 @@ OTA：
 ```powershell
 .\dev.ps1 flash -dry_run
 .\dev.ps1 ota -dry_run
+.\dev.ps1 reset -dry_run
 .\dev.ps1 image_list
 ```
 
@@ -234,10 +260,10 @@ OTA：
 | `Flash` | `FlashProgrammer` | `flash -target bootloader/app/all` | STM32CubeProgrammer 命令。 |
 | `Flash` | `BootloaderHexPath` | `flash -target bootloader/all` | MCUboot hex。 |
 | `Flash` | `AppConfirmedHexPath` | `flash -target app/all` | confirmed 应用 hex。 |
-| `Ota` | `Address` | `ota`、`image_list`、`image_confirm` | OTA 目标地址。 |
-| `Ota` | `Port` | `ota`、`image_list`、`image_confirm` | OTA 目标端口。 |
-| `Ota` | `ConnType` | `ota`、`image_list`、`image_confirm` | mcumgr 连接类型。 |
-| `Ota` | `McuMgr` | `ota`、`image_list`、`image_confirm` | mcumgr 命令。 |
+| `Ota` | `Address` | `ota`、`reset`、`image_list`、`image_confirm` | OTA 目标地址。 |
+| `Ota` | `Port` | `ota`、`reset`、`image_list`、`image_confirm` | OTA 目标端口。 |
+| `Ota` | `ConnType` | `ota`、`reset`、`image_list`、`image_confirm` | mcumgr 连接类型。 |
+| `Ota` | `McuMgr` | `ota`、`reset`、`image_list`、`image_confirm` | mcumgr 命令。 |
 | `Ota` | `ImagePath` | `ota` | 默认 OTA 镜像路径。 |
 | `Ota` | `AppSignedBinPath` | `ota` | sysbuild signed bin。 |
 | `Ota` | `AppSignedHexPath` | `ota` | sysbuild signed hex。 |

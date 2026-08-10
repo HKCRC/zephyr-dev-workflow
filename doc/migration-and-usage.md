@@ -19,6 +19,7 @@ your-zephyr-project/
         build.ps1
         flash.ps1
         ota.ps1
+        reset.ps1
         image_list.ps1
         image_comfirm.ps1
       doc/
@@ -185,6 +186,7 @@ tool/zephyr-dev-workflow/doc/command-table.md
 build.ps1
 flash.ps1
 ota.ps1
+reset.ps1
 image_list.ps1
 image_comfirm.ps1
 project_common.ps1
@@ -236,6 +238,12 @@ Test-Path .\tool\zephyr-dev-workflow\script\dev.ps1
 
 ```powershell
 .\dev.ps1 ota -dry_run
+```
+
+验证重启命令但不实际重启：
+
+```powershell
+.\dev.ps1 reset -dry_run
 ```
 
 ## 常用命令
@@ -311,6 +319,14 @@ OTA 成功启动并验证功能正常后，确认当前镜像：
 
 如果不确认，MCUboot 可能在后续重启时回滚。
 
+### 重启设备
+
+```powershell
+.\dev.ps1 reset
+```
+
+该命令通过 `mcumgr reset` 触发设备重启。如果 OTA 后启动到 test 镜像，但不执行 `image_confirm`，再次重启后 MCUboot 会按未确认镜像处理，通常回滚到旧固件。
+
 ### 查询镜像状态
 
 ```powershell
@@ -322,6 +338,7 @@ OTA 成功启动并验证功能正常后，确认当前镜像：
 ```powershell
 .\dev.ps1 flash -dry_run
 .\dev.ps1 ota -dry_run
+.\dev.ps1 reset -dry_run
 .\dev.ps1 image_confirm -dry_run
 ```
 

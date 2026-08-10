@@ -1,4 +1,4 @@
-# Version: 3.7.0
+# Version: 3.8.0
 param(
     [string]$config = "",
     [string]$board = "",
@@ -7,7 +7,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.7.0"
+$ScriptVersion = "3.8.0"
 if ($version) {
     Write-Host "build.ps1 version $ScriptVersion"
     exit 0

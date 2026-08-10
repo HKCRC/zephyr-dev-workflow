@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.0
+
+- Add `reset` workflow command for `mcumgr reset`.
+- Support `reset -dry_run`, `reset -address`, `reset -port`, `reset -conn_type`, and `reset -mcu_mgr`.
+
 ## 3.7.0
 
 - Standardize public command options to lower_snake_case, for example `-dry_run`, `-extra_conf`, and `-image_path`.

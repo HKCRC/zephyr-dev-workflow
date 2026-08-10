@@ -11,6 +11,7 @@ Use the dispatcher from a firmware project root:
 .\dev.ps1 build -pristine
 .\dev.ps1 flash
 .\dev.ps1 ota
+.\dev.ps1 reset
 .\dev.ps1 image_list
 .\dev.ps1 image_confirm
 ```
@@ -21,6 +22,7 @@ Use the dispatcher from a firmware project root:
 - `script/build.ps1`: build a Zephyr sysbuild project.
 - `script/flash.ps1`: flash by west runner or STM32CubeProgrammer.
 - `script/ota.ps1`: upload an MCUboot/mcumgr OTA image.
+- `script/reset.ps1`: reset a device by mcumgr.
 - `script/image_list.ps1`: list MCUboot images by mcumgr.
 - `script/image_comfirm.ps1`: confirm the active MCUboot image.
 
