@@ -5,6 +5,7 @@
 - Add no-bootloader build support with `build -target none`.
 - Add no-bootloader flashing support with `flash -target none`.
 - Keep existing MCUboot targets unchanged: `app`, `all`, `bootloader`, and `west`.
+- Rename the shared dispatcher from `script/dev.ps1` to `script/workflow.ps1` so project roots can reserve `dev.ps1` as a thin entry point.
 
 ## 3.9.0
 

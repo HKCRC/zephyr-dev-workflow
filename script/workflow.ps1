@@ -4,8 +4,11 @@ $ScriptVersion = "3.10.0"
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
     Write-Host ""
-    Write-Host "Usage:"
+    Write-Host "Project root usage:"
     Write-Host "  .\dev.ps1 <command> [options]"
+    Write-Host ""
+    Write-Host "Shared workflow dispatcher usage:"
+    Write-Host "  .\workflow.ps1 <command> [options]"
     Write-Host ""
     Write-Host "Commands:"
     Write-Host "  build          Build MCUboot app by default; use -target none for no bootloader."
@@ -80,7 +83,7 @@ function Convert-ArgumentsToSplat {
         }
 
         if (-not $optionSet.ContainsKey($name)) {
-            Write-Error "Unknown workflow option: -$name. Use lower_snake_case options from .\dev.ps1 --help."
+            Write-Error "Unknown workflow option: -$name. Use lower_snake_case options from .\workflow.ps1 --help."
             exit 1
         }
 
@@ -119,7 +122,7 @@ if ($command -in @("--help", "-help", "-h", "-?")) {
 }
 
 if ($command -eq "-version") {
-    Write-Host "dev.ps1 version $ScriptVersion"
+    Write-Host "workflow.ps1 version $ScriptVersion"
     exit 0
 }
 

@@ -21,7 +21,7 @@ Use the dispatcher from a firmware project root:
 
 ## Scripts
 
-- `script/dev.ps1`: dispatch workflow commands to the scripts below.
+- `script/workflow.ps1`: shared dispatcher used by a firmware project's root `dev.ps1` entry.
 - `script/build.ps1`: build an MCUboot app by default, build without bootloader with `-target none`, or sysbuild bootloader + app with `-target all`.
 - `script/flash.ps1`: flash by west runner or STM32CubeProgrammer.
 - `script/ota.ps1`: upload an MCUboot/mcumgr OTA image.
