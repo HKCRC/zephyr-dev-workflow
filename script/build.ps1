@@ -1,15 +1,15 @@
-# Version: 3.9.0
+# Version: 3.10.0
 param(
     [string]$config = "",
     [string]$board = "",
     [string]$extra_conf = "",
-    [ValidateSet("app", "all")]
+    [ValidateSet("none", "app", "all")]
     [string]$target = "app",
     [switch]$pristine,
     [switch]$version
 )
 
-$ScriptVersion = "3.9.0"
+$ScriptVersion = "3.10.0"
 if ($version) {
     Write-Host "build.ps1 version $ScriptVersion"
     exit 0
@@ -29,6 +29,39 @@ $env:ZEPHYR_SDK_INSTALL_DIR = Resolve-ProjectPath (Expand-ProjectConfigValue (Re
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
 $appBuildName = Require-ConfigValue "AppBuildName" $projectConfig.AppBuildName
 $appBuildDir = Join-Path $buildDir $appBuildName
+
+if ($target -eq "none") {
+    $westArgs = @(
+        "build",
+        "-b", $board,
+        $projectRoot,
+        "-d", $buildDir,
+        "--",
+        "-DBOARD_ROOT=$projectRoot"
+    )
+
+    if ($pristine) {
+        $westArgs = @("build", "-p", "always") + $westArgs[1..($westArgs.Count - 1)]
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($extra_conf)) {
+        $extraConfPath = if ([System.IO.Path]::IsPathRooted($extra_conf)) {
+            $extra_conf
+        } else {
+            Join-Path $projectRoot $extra_conf
+        }
+
+        if (-not (Test-Path $extraConfPath)) {
+            Write-Error "Extra config file not found: $extraConfPath"
+            exit 1
+        }
+
+        $westArgs += "-DEXTRA_CONF_FILE=$extraConfPath"
+    }
+
+    & python -m west @westArgs
+    exit $LASTEXITCODE
+}
 
 if ($target -eq "app") {
     if ($pristine) {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.10.0
+
+- Add no-bootloader build support with `build -target none`.
+- Add no-bootloader flashing support with `flash -target none`.
+- Keep existing MCUboot targets unchanged: `app`, `all`, `bootloader`, and `west`.
+
 ## 3.9.0
 
 - Change `build` default target to `app`; use `build -target all` for sysbuild bootloader + app builds.

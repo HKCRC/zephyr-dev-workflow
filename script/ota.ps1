@@ -1,4 +1,4 @@
-# Version: 3.9.0
+# Version: 3.10.0
 param(
     [string]$config = "",
     [string]$board = "",
@@ -14,7 +14,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.9.0"
+$ScriptVersion = "3.10.0"
 if ($version) {
     Write-Host "ota.ps1 version $ScriptVersion"
     exit 0

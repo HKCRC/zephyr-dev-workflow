@@ -1,5 +1,5 @@
-# Version: 3.9.0
-$ScriptVersion = "3.9.0"
+# Version: 3.10.0
+$ScriptVersion = "3.10.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
@@ -8,8 +8,8 @@ function Show-Help {
     Write-Host "  .\dev.ps1 <command> [options]"
     Write-Host ""
     Write-Host "Commands:"
-    Write-Host "  build          Build app by default, or bootloader + app with -target all."
-    Write-Host "  flash          Flash app by default, or bootloader + app with -target all."
+    Write-Host "  build          Build MCUboot app by default; use -target none for no bootloader."
+    Write-Host "  flash          Flash MCUboot app by default; use -target none for no bootloader."
     Write-Host "  ota            Upload and test an MCUboot OTA image."
     Write-Host "  reset          Reset device by mcumgr."
     Write-Host "  image_list     List MCUboot images by mcumgr."

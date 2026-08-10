@@ -1,9 +1,9 @@
-# Version: 3.9.0
+# Version: 3.10.0
 param(
     [string]$config = "",
     [string]$board = "",
     [string]$runner = "",
-    [ValidateSet("app", "all", "bootloader", "west")]
+    [ValidateSet("none", "app", "all", "bootloader", "west")]
     [string]$target = "app",
     [string]$connection = "",
     [string]$programmer = "",
@@ -12,7 +12,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.9.0"
+$ScriptVersion = "3.10.0"
 if ($version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
@@ -87,6 +87,15 @@ function Flash-App {
         -Arguments @("-c", $connection, "-w", $appHex, "-v")
 }
 
+function Flash-NoBootloaderApp {
+    $appHex = Join-Path $buildDir "zephyr\zephyr.hex"
+    Require-File $appHex
+
+    Invoke-Stm32Programmer `
+        -Description "Flashing application image without bootloader..." `
+        -Arguments @("-c", $connection, "-w", $appHex, "-v")
+}
+
 if ($target -eq "west") {
     $westArgs = @("flash", "-d", $buildDir, "--runner", $runner)
 
@@ -104,6 +113,7 @@ if ($include_bootloader -or $target -eq "bootloader" -or $target -eq "all") {
 }
 
 switch ($target) {
+    "none" { Flash-NoBootloaderApp; break }
     "bootloader" { break }
     "app" { Flash-App; break }
     "all" { Flash-App; break }
