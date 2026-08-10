@@ -8,11 +8,11 @@ Use the dispatcher from a firmware project root:
 
 ```powershell
 .\dev.ps1 build
-.\dev.ps1 build -Pristine
+.\dev.ps1 build -pristine
 .\dev.ps1 flash
 .\dev.ps1 ota
-.\dev.ps1 image-list
-.\dev.ps1 image-confirm
+.\dev.ps1 image_list
+.\dev.ps1 image_confirm
 ```
 
 ## Scripts
@@ -24,11 +24,13 @@ Use the dispatcher from a firmware project root:
 - `script/image_list.ps1`: list MCUboot images by mcumgr.
 - `script/image_comfirm.ps1`: confirm the active MCUboot image.
 
-Project-specific values stay in each firmware repository's
-`project_config.json`. The script resolves relative paths from that config
-file's directory, so this repository can be used as a Git submodule.
+Project-specific values stay in each firmware repository's `project_config.json`.
+The script resolves relative paths from that config file's directory, so this
+repository can be used as a Git submodule.
 
 ## Documents
 
-- `doc/command-table.md`: command and parameter reference for build, flash,
-  OTA, and MCUboot image management workflows.
+- `doc/command-table.md`: command and parameter reference for build, flash, OTA,
+  and MCUboot image management workflows.
+- `doc/migration-and-usage.md`: migration guide for adding this tool to a Zephyr
+  project and daily usage guide for new developers.

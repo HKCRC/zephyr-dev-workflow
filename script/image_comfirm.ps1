@@ -1,38 +1,38 @@
-# Version: 3.6.0
+# Version: 3.7.0
 param(
-    [string]$Config = "",
-    [string]$Address = "",
-    [Nullable[int]]$Port = $null,
-    [string]$ConnType = "",
-    [string]$McuMgr = "",
-    [switch]$DryRun,
-    [switch]$Version
+    [string]$config = "",
+    [string]$address = "",
+    [Nullable[int]]$port = $null,
+    [string]$conn_type = "",
+    [string]$mcu_mgr = "",
+    [switch]$dry_run,
+    [switch]$version
 )
 
-$ScriptVersion = "3.6.0"
-if ($Version) {
+$ScriptVersion = "3.7.0"
+if ($version) {
     Write-Host "image_comfirm.ps1 version $ScriptVersion"
     exit 0
 }
 
 . "$PSScriptRoot\project_common.ps1"
 
-$projectConfig = Get-ProjectConfig $Config
-$Address = Use-ConfigValue $Address $projectConfig.Address
-$Port = Use-ConfigValue $Port $projectConfig.Port
-$ConnType = Use-ConfigValue $ConnType $projectConfig.ConnType
-$McuMgr = Use-ConfigValue $McuMgr $projectConfig.McuMgr
-$connString = "$Address`:$Port"
+$projectConfig = Get-ProjectConfig $config
+$address = Use-ConfigValue $address $projectConfig.Address
+$port = Use-ConfigValue $port $projectConfig.Port
+$conn_type = Use-ConfigValue $conn_type $projectConfig.ConnType
+$mcu_mgr = Use-ConfigValue $mcu_mgr $projectConfig.McuMgr
+$connString = "$address`:$port"
 
 function Invoke-McuMgr {
     param([string[]]$Arguments)
 
-    if ($DryRun) {
-        Write-Host "$McuMgr $($Arguments -join ' ')"
+    if ($dry_run) {
+        Write-Host "$mcu_mgr $($Arguments -join ' ')"
         return @()
     }
 
-    $output = & $McuMgr @Arguments 2>&1
+    $output = & $mcu_mgr @Arguments 2>&1
     $exitCode = $LASTEXITCODE
     $output | ForEach-Object { Write-Host $_ }
     if ($exitCode -ne 0) {
@@ -79,8 +79,8 @@ function Get-ActiveImageHash {
 }
 
 Write-Host "Reading image list from $connString..."
-$imageList = Invoke-McuMgr @("--conntype", $ConnType, "--connstring", $connString, "image", "list")
-if ($DryRun) {
+$imageList = Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "image", "list")
+if ($dry_run) {
     Write-Host "Dry run stops before parsing active image hash."
     exit 0
 }
@@ -91,7 +91,7 @@ if ([string]::IsNullOrWhiteSpace($activeHash)) {
     exit 1
 }
 
-$argsList = @("--conntype", $ConnType, "--connstring", $connString, "image", "confirm", $activeHash)
+$argsList = @("--conntype", $conn_type, "--connstring", $connString, "image", "confirm", $activeHash)
 
 Write-Host "Confirming active firmware as valid: $activeHash"
 Invoke-McuMgr $argsList | Out-Null

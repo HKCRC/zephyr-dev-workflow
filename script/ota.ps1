@@ -1,41 +1,41 @@
-# Version: 3.6.0
+# Version: 3.7.0
 param(
-    [string]$Config = "",
-    [string]$Board = "",
-    [string]$Address = "",
-    [Nullable[int]]$Port = $null,
-    [string]$ConnType = "",
-    [string]$McuMgr = "",
-    [string]$ImagePath = "",
-    [switch]$SkipUpload,
-    [switch]$SkipReset,
-    [switch]$DryRun,
-    [switch]$RawUploadOutput,
-    [switch]$Version
+    [string]$config = "",
+    [string]$board = "",
+    [string]$address = "",
+    [Nullable[int]]$port = $null,
+    [string]$conn_type = "",
+    [string]$mcu_mgr = "",
+    [string]$image_path = "",
+    [switch]$skip_upload,
+    [switch]$skip_reset,
+    [switch]$dry_run,
+    [switch]$raw_upload_output,
+    [switch]$version
 )
 
-$ScriptVersion = "3.6.0"
-if ($Version) {
+$ScriptVersion = "3.7.0"
+if ($version) {
     Write-Host "ota.ps1 version $ScriptVersion"
     exit 0
 }
 
 . "$PSScriptRoot\project_common.ps1"
 
-$projectConfig = Get-ProjectConfig $Config
+$projectConfig = Get-ProjectConfig $config
 $projectRoot = Get-ProjectRoot
-$Board = Use-ConfigValue $Board $projectConfig.Board
-$Address = Use-ConfigValue $Address $projectConfig.Address
-$Port = Use-ConfigValue $Port $projectConfig.Port
-$ConnType = Use-ConfigValue $ConnType $projectConfig.ConnType
-$McuMgr = Use-ConfigValue $McuMgr $projectConfig.McuMgr
-$ImagePath = Use-ConfigValue $ImagePath $projectConfig.ImagePath
+$board = Use-ConfigValue $board $projectConfig.Board
+$address = Use-ConfigValue $address $projectConfig.Address
+$port = Use-ConfigValue $port $projectConfig.Port
+$conn_type = Use-ConfigValue $conn_type $projectConfig.ConnType
+$mcu_mgr = Use-ConfigValue $mcu_mgr $projectConfig.McuMgr
+$image_path = Use-ConfigValue $image_path $projectConfig.ImagePath
 
-$Board = Require-ConfigValue "Board" $Board
-$Address = Require-ConfigValue "Address" $Address
-$Port = Require-ConfigValue "Port" $Port
-$ConnType = Require-ConfigValue "ConnType" $ConnType
-$McuMgr = Require-ConfigValue "McuMgr" $McuMgr
+$board = Require-ConfigValue "Board" $board
+$address = Require-ConfigValue "Address" $address
+$port = Require-ConfigValue "Port" $port
+$conn_type = Require-ConfigValue "ConnType" $conn_type
+$mcu_mgr = Require-ConfigValue "McuMgr" $mcu_mgr
 
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
 $otaDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "OtaOutputDir" $projectConfig.OtaOutputDir) $projectConfig)
@@ -43,13 +43,13 @@ $defaultSignedBin = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-Conf
 $defaultSignedHex = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "AppSignedHexPath" $projectConfig.AppSignedHexPath) $projectConfig)
 $updateBin = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "OtaUpdateBinPath" $projectConfig.OtaUpdateBinPath) $projectConfig)
 $updateHex = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "OtaUpdateHexPath" $projectConfig.OtaUpdateHexPath) $projectConfig)
-$connString = "$Address`:$Port"
+$connString = "$address`:$port"
 
 function Require-File {
     param([string]$Path)
 
     if (-not (Test-Path $Path)) {
-        Write-Error "Required file not found: $Path. Run .\build.ps1 -Board $Board first."
+        Write-Error "Required file not found: $Path. Run .\dev.ps1 build -board $board first."
         exit 1
     }
 }
@@ -57,12 +57,12 @@ function Require-File {
 function Invoke-McuMgr {
     param([string[]]$Arguments)
 
-    if ($DryRun) {
-        Write-Host "$McuMgr $($Arguments -join ' ')"
+    if ($dry_run) {
+        Write-Host "$mcu_mgr $($Arguments -join ' ')"
         return @()
     }
 
-    $output = & $McuMgr @Arguments 2>&1
+    $output = & $mcu_mgr @Arguments 2>&1
     $exitCode = $LASTEXITCODE
     $output | ForEach-Object { Write-Host $_ }
     if ($exitCode -ne 0) {
@@ -75,20 +75,20 @@ function Invoke-McuMgr {
 function Invoke-McuMgrUpload {
     param([string[]]$Arguments)
 
-    if ($DryRun) {
-        Write-Host "$McuMgr $($Arguments -join ' ')"
+    if ($dry_run) {
+        Write-Host "$mcu_mgr $($Arguments -join ' ')"
         return
     }
 
-    if ($RawUploadOutput) {
-        & $McuMgr @Arguments
+    if ($raw_upload_output) {
+        & $mcu_mgr @Arguments
         if ($LASTEXITCODE -ne 0) {
             exit $LASTEXITCODE
         }
         return
     }
 
-    $output = & $McuMgr @Arguments 2>&1
+    $output = & $mcu_mgr @Arguments 2>&1
     $exitCode = $LASTEXITCODE
 
     if ($exitCode -ne 0) {
@@ -124,7 +124,7 @@ function Get-Slot1Hash {
     return $null
 }
 
-if ([string]::IsNullOrWhiteSpace($ImagePath)) {
+if ([string]::IsNullOrWhiteSpace($image_path)) {
     Require-File $defaultSignedBin
     New-Item -ItemType Directory -Force -Path $otaDir | Out-Null
     Write-Host "Using sysbuild-generated signed image:"
@@ -135,24 +135,24 @@ if ([string]::IsNullOrWhiteSpace($ImagePath)) {
         Copy-Item $defaultSignedHex $updateHex -Force
     }
 
-    $ImagePath = $updateBin
+    $image_path = $updateBin
     Write-Host "Prepared signed OTA image:"
-    Write-Host "  $ImagePath"
+    Write-Host "  $image_path"
 } else {
-    if (-not [System.IO.Path]::IsPathRooted($ImagePath)) {
-        $ImagePath = Join-Path $projectRoot $ImagePath
+    if (-not [System.IO.Path]::IsPathRooted($image_path)) {
+        $image_path = Join-Path $projectRoot $image_path
     }
-    Require-File $ImagePath
+    Require-File $image_path
 }
 
-if (-not $SkipUpload) {
+if (-not $skip_upload) {
     Write-Host "Uploading signed image to slot1..."
-    Invoke-McuMgrUpload @("--conntype", $ConnType, "--connstring", $connString, "image", "upload", $ImagePath)
+    Invoke-McuMgrUpload @("--conntype", $conn_type, "--connstring", $connString, "image", "upload", $image_path)
 }
 
 Write-Host "Reading image list..."
-$imageList = Invoke-McuMgr @("--conntype", $ConnType, "--connstring", $connString, "image", "list")
-if ($DryRun) {
+$imageList = Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "image", "list")
+if ($dry_run) {
     Write-Host "Dry run stops before parsing slot1 image hash."
     exit 0
 }
@@ -163,23 +163,23 @@ if ([string]::IsNullOrWhiteSpace($slot1Hash)) {
     exit 1
 }
 
-if ($SkipUpload) {
+if ($skip_upload) {
     Write-Host "Current slot1 firmware hash: $slot1Hash"
 } else {
     Write-Host "OTA update firmware hash: $slot1Hash"
 }
 
 Write-Host "Marking slot1 image as test upgrade: $slot1Hash"
-Invoke-McuMgr @("--conntype", $ConnType, "--connstring", $connString, "image", "test", $slot1Hash) | Out-Null
+Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "image", "test", $slot1Hash) | Out-Null
 
-if ($SkipReset) {
+if ($skip_reset) {
     Write-Host "OTA image marked as test upgrade. Reset skipped."
     exit 0
 }
 
 Write-Host "Resetting device to switch to the new firmware..."
-Invoke-McuMgr @("--conntype", $ConnType, "--connstring", $connString, "reset") | Out-Null
+Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "reset") | Out-Null
 
 Write-Host "OTA requested. After the new firmware boots and passes validation, run:"
-Write-Host "  .\dev.ps1 image-confirm -Address $Address -Port $Port"
+Write-Host "  .\dev.ps1 image_confirm -address $address -port $port"
 exit 0

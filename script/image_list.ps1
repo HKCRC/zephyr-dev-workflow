@@ -1,28 +1,28 @@
-# Version: 3.6.0
+# Version: 3.7.0
 param(
-    [string]$Config = "",
-    [string]$Address = "",
-    [Nullable[int]]$Port = $null,
-    [string]$ConnType = "",
-    [string]$McuMgr = "",
-    [switch]$Version
+    [string]$config = "",
+    [string]$address = "",
+    [Nullable[int]]$port = $null,
+    [string]$conn_type = "",
+    [string]$mcu_mgr = "",
+    [switch]$version
 )
 
-$ScriptVersion = "3.6.0"
-if ($Version) {
+$ScriptVersion = "3.7.0"
+if ($version) {
     Write-Host "image_list.ps1 version $ScriptVersion"
     exit 0
 }
 
 . "$PSScriptRoot\project_common.ps1"
 
-$projectConfig = Get-ProjectConfig $Config
-$Address = Use-ConfigValue $Address $projectConfig.Address
-$Port = Use-ConfigValue $Port $projectConfig.Port
-$ConnType = Use-ConfigValue $ConnType $projectConfig.ConnType
-$McuMgr = Use-ConfigValue $McuMgr $projectConfig.McuMgr
-$connString = "$Address`:$Port"
+$projectConfig = Get-ProjectConfig $config
+$address = Use-ConfigValue $address $projectConfig.Address
+$port = Use-ConfigValue $port $projectConfig.Port
+$conn_type = Use-ConfigValue $conn_type $projectConfig.ConnType
+$mcu_mgr = Use-ConfigValue $mcu_mgr $projectConfig.McuMgr
+$connString = "$address`:$port"
 
 Write-Host "Querying MCUboot image list from $connString..."
-& $McuMgr --conntype $ConnType --connstring $connString image list
+& $mcu_mgr --conntype $conn_type --connstring $connString image list
 exit $LASTEXITCODE

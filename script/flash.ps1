@@ -1,35 +1,35 @@
-# Version: 3.6.0
+# Version: 3.7.0
 param(
-    [string]$Config = "",
-    [string]$Board = "",
-    [string]$Runner = "",
-    [ValidateSet("West", "Bootloader", "App", "All")]
-    [string]$Target = "West",
-    [string]$Connection = "",
-    [string]$Programmer = "",
-    [switch]$IncludeBootloader,
-    [switch]$DryRun,
-    [switch]$Version
+    [string]$config = "",
+    [string]$board = "",
+    [string]$runner = "",
+    [ValidateSet("west", "bootloader", "app", "all")]
+    [string]$target = "west",
+    [string]$connection = "",
+    [string]$programmer = "",
+    [switch]$include_bootloader,
+    [switch]$dry_run,
+    [switch]$version
 )
 
-$ScriptVersion = "3.6.0"
-if ($Version) {
+$ScriptVersion = "3.7.0"
+if ($version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
 }
 
 . "$PSScriptRoot\project_common.ps1"
 
-$projectConfig = Get-ProjectConfig $Config
-$Board = Use-ConfigValue $Board $projectConfig.Board
-$Runner = Use-ConfigValue $Runner $projectConfig.FlashRunner
-$Connection = Use-ConfigValue $Connection $projectConfig.FlashConnection
-$Programmer = Use-ConfigValue $Programmer $projectConfig.FlashProgrammer
+$projectConfig = Get-ProjectConfig $config
+$board = Use-ConfigValue $board $projectConfig.Board
+$runner = Use-ConfigValue $runner $projectConfig.FlashRunner
+$connection = Use-ConfigValue $connection $projectConfig.FlashConnection
+$programmer = Use-ConfigValue $programmer $projectConfig.FlashProgrammer
 
-$Board = Require-ConfigValue "Board" $Board
-$Runner = Require-ConfigValue "FlashRunner" $Runner
-$Connection = Require-ConfigValue "FlashConnection" $Connection
-$Programmer = Require-ConfigValue "FlashProgrammer" $Programmer
+$board = Require-ConfigValue "Board" $board
+$runner = Require-ConfigValue "FlashRunner" $runner
+$connection = Require-ConfigValue "FlashConnection" $connection
+$programmer = Require-ConfigValue "FlashProgrammer" $programmer
 
 $env:ZEPHYR_BASE = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "ZephyrBase" $projectConfig.ZephyrBase) $projectConfig)
 $env:ZEPHYR_TOOLCHAIN_VARIANT = "zephyr"
@@ -38,7 +38,7 @@ $env:ZEPHYR_SDK_INSTALL_DIR = Resolve-ProjectPath (Expand-ProjectConfigValue (Re
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
 
 if (-not (Test-Path $buildDir)) {
-    Write-Error "Build directory not found: $buildDir. Run .\dev.ps1 build -Board $Board first."
+    Write-Error "Build directory not found: $buildDir. Run .\dev.ps1 build -board $board first."
     exit 1
 }
 
@@ -46,7 +46,7 @@ function Require-File {
     param([string]$Path)
 
     if (-not (Test-Path $Path)) {
-        Write-Error "Required image not found: $Path. Run .\dev.ps1 build -Board $Board first."
+        Write-Error "Required image not found: $Path. Run .\dev.ps1 build -board $board first."
         exit 1
     }
 }
@@ -58,12 +58,12 @@ function Invoke-Stm32Programmer {
     )
 
     Write-Host $Description
-    if ($DryRun) {
-        Write-Host "$Programmer $($Arguments -join ' ')"
+    if ($dry_run) {
+        Write-Host "$programmer $($Arguments -join ' ')"
         return
     }
 
-    & $Programmer @Arguments
+    & $programmer @Arguments
     if ($LASTEXITCODE -ne 0) {
         exit $LASTEXITCODE
     }
@@ -75,7 +75,7 @@ function Flash-Bootloader {
 
     Invoke-Stm32Programmer `
         -Description "Flashing MCUboot bootloader to boot_partition..." `
-        -Arguments @("-c", $Connection, "-w", $bootloaderHex, "-v")
+        -Arguments @("-c", $connection, "-w", $bootloaderHex, "-v")
 }
 
 function Flash-App {
@@ -84,13 +84,13 @@ function Flash-App {
 
     Invoke-Stm32Programmer `
         -Description "Flashing confirmed application image to slot0_partition..." `
-        -Arguments @("-c", $Connection, "-w", $appHex, "-v")
+        -Arguments @("-c", $connection, "-w", $appHex, "-v")
 }
 
-if ($Target -eq "West") {
-    $westArgs = @("flash", "-d", $buildDir, "--runner", $Runner)
+if ($target -eq "west") {
+    $westArgs = @("flash", "-d", $buildDir, "--runner", $runner)
 
-    if ($DryRun) {
+    if ($dry_run) {
         Write-Host "python -m west $($westArgs -join ' ')"
         exit 0
     }
@@ -99,14 +99,14 @@ if ($Target -eq "West") {
     exit $LASTEXITCODE
 }
 
-if ($IncludeBootloader -or $Target -eq "Bootloader" -or $Target -eq "All") {
+if ($include_bootloader -or $target -eq "bootloader" -or $target -eq "all") {
     Flash-Bootloader
 }
 
-switch ($Target) {
-    "Bootloader" { break }
-    "App" { Flash-App; break }
-    "All" { Flash-App; break }
+switch ($target) {
+    "bootloader" { break }
+    "app" { Flash-App; break }
+    "all" { Flash-App; break }
 }
 
 exit 0

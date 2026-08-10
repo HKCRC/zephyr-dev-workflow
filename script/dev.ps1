@@ -1,5 +1,5 @@
-# Version: 3.6.0
-$ScriptVersion = "3.6.0"
+# Version: 3.7.0
+$ScriptVersion = "3.7.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
@@ -11,18 +11,19 @@ function Show-Help {
     Write-Host "  build          Build the Zephyr sysbuild project."
     Write-Host "  flash          Flash firmware by west runner or STM32CubeProgrammer."
     Write-Host "  ota            Upload and test an MCUboot OTA image."
-    Write-Host "  image-list     List MCUboot images by mcumgr."
-    Write-Host "  image-confirm  Confirm the active MCUboot image."
+    Write-Host "  image_list     List MCUboot images by mcumgr."
+    Write-Host "  image_confirm  Confirm the active MCUboot image."
     Write-Host ""
     Write-Host "Common options:"
-    Write-Host "  -Config <path> Use a project_config.json file."
-    Write-Host "  -Version       Show the selected command version."
+    Write-Host "  -config <path> Use a project_config.json file."
+    Write-Host "  -version       Show the selected command version."
 }
 
 function Invoke-WorkflowCommand {
     param(
         [string]$ScriptName,
         [string[]]$Arguments,
+        [string[]]$OptionNames = @(),
         [string[]]$SwitchNames = @()
     )
 
@@ -32,7 +33,7 @@ function Invoke-WorkflowCommand {
         exit 1
     }
 
-    $splat = Convert-ArgumentsToSplat -Arguments $Arguments -SwitchNames $SwitchNames
+    $splat = Convert-ArgumentsToSplat -Arguments $Arguments -OptionNames $OptionNames -SwitchNames $SwitchNames
     & $scriptPath @splat
     exit $LASTEXITCODE
 }
@@ -40,13 +41,19 @@ function Invoke-WorkflowCommand {
 function Convert-ArgumentsToSplat {
     param(
         [string[]]$Arguments,
+        [string[]]$OptionNames = @(),
         [string[]]$SwitchNames = @()
     )
 
     $splat = @{}
+    $optionSet = @{}
     $switchSet = @{}
+    foreach ($name in $OptionNames) {
+        $optionSet[$name] = $true
+    }
+
     foreach ($name in $SwitchNames) {
-        $switchSet[$name.ToLowerInvariant()] = $true
+        $switchSet[$name] = $true
     }
 
     for ($i = 0; $i -lt $Arguments.Count; $i++) {
@@ -66,9 +73,14 @@ function Convert-ArgumentsToSplat {
             $value = $split[1]
         }
 
-        if ($switchSet.ContainsKey($name.ToLowerInvariant())) {
+        if ($switchSet.ContainsKey($name)) {
             $splat[$name] = $true
             continue
+        }
+
+        if (-not $optionSet.ContainsKey($name)) {
+            Write-Error "Unknown workflow option: -$name. Use lower_snake_case options from .\dev.ps1 --help."
+            exit 1
         }
 
         if ($null -eq $value) {
@@ -100,32 +112,31 @@ if ($rawArgs.Count -gt 1) {
     $remainingArgs = @($rawArgs[1..($rawArgs.Count - 1)])
 }
 
-switch -Regex ($command) {
-    '^-{1,2}(h|help|\?)$' {
-        Show-Help
-        exit 0
-    }
-    '^-{1,2}version$' {
-        Write-Host "dev.ps1 version $ScriptVersion"
-        exit 0
-    }
+if ($command -in @("--help", "-help", "-h", "-?")) {
+    Show-Help
+    exit 0
 }
 
-switch ($command.ToLowerInvariant()) {
+if ($command -eq "-version") {
+    Write-Host "dev.ps1 version $ScriptVersion"
+    exit 0
+}
+
+switch -CaseSensitive ($command) {
     "build" {
-        Invoke-WorkflowCommand -ScriptName "build.ps1" -Arguments $remainingArgs -SwitchNames @("Pristine", "Version")
+        Invoke-WorkflowCommand -ScriptName "build.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "extra_conf") -SwitchNames @("pristine", "version")
     }
     "flash" {
-        Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -SwitchNames @("IncludeBootloader", "DryRun", "Version")
+        Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "runner", "target", "connection", "programmer") -SwitchNames @("include_bootloader", "dry_run", "version")
     }
     "ota" {
-        Invoke-WorkflowCommand -ScriptName "ota.ps1" -Arguments $remainingArgs -SwitchNames @("SkipUpload", "SkipReset", "DryRun", "RawUploadOutput", "Version")
+        Invoke-WorkflowCommand -ScriptName "ota.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "address", "port", "conn_type", "mcu_mgr", "image_path") -SwitchNames @("skip_upload", "skip_reset", "dry_run", "raw_upload_output", "version")
     }
-    { $_ -in @("image-list", "image_list", "imagelist", "list-image", "list-images") } {
-        Invoke-WorkflowCommand -ScriptName "image_list.ps1" -Arguments $remainingArgs -SwitchNames @("Version")
+    "image_list" {
+        Invoke-WorkflowCommand -ScriptName "image_list.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("version")
     }
-    { $_ -in @("image-confirm", "image_confirm", "image-comfirm", "image_comfirm", "confirm-image", "confirm") } {
-        Invoke-WorkflowCommand -ScriptName "image_comfirm.ps1" -Arguments $remainingArgs -SwitchNames @("DryRun", "Version")
+    "image_confirm" {
+        Invoke-WorkflowCommand -ScriptName "image_comfirm.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
     }
     default {
         Write-Error "Unknown workflow command: $command"
