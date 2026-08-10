@@ -8,8 +8,9 @@ Use the dispatcher from a firmware project root:
 
 ```powershell
 .\dev.ps1 build
-.\dev.ps1 build -pristine
+.\dev.ps1 build -target all -pristine
 .\dev.ps1 flash
+.\dev.ps1 flash -target all
 .\dev.ps1 ota
 .\dev.ps1 reset
 .\dev.ps1 image_list
@@ -19,7 +20,7 @@ Use the dispatcher from a firmware project root:
 ## Scripts
 
 - `script/dev.ps1`: dispatch workflow commands to the scripts below.
-- `script/build.ps1`: build a Zephyr sysbuild project.
+- `script/build.ps1`: build the app by default, or sysbuild bootloader + app with `-target all`.
 - `script/flash.ps1`: flash by west runner or STM32CubeProgrammer.
 - `script/ota.ps1`: upload an MCUboot/mcumgr OTA image.
 - `script/reset.ps1`: reset a device by mcumgr.

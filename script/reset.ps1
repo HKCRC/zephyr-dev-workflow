@@ -1,4 +1,4 @@
-# Version: 3.8.0
+# Version: 3.9.0
 param(
     [string]$config = "",
     [string]$address = "",
@@ -9,7 +9,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.8.0"
+$ScriptVersion = "3.9.0"
 if ($version) {
     Write-Host "reset.ps1 version $ScriptVersion"
     exit 0

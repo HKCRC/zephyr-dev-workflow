@@ -1,5 +1,5 @@
-# Version: 3.8.0
-$ScriptVersion = "3.8.0"
+# Version: 3.9.0
+$ScriptVersion = "3.9.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
@@ -8,8 +8,8 @@ function Show-Help {
     Write-Host "  .\dev.ps1 <command> [options]"
     Write-Host ""
     Write-Host "Commands:"
-    Write-Host "  build          Build the Zephyr sysbuild project."
-    Write-Host "  flash          Flash firmware by west runner or STM32CubeProgrammer."
+    Write-Host "  build          Build app by default, or bootloader + app with -target all."
+    Write-Host "  flash          Flash app by default, or bootloader + app with -target all."
     Write-Host "  ota            Upload and test an MCUboot OTA image."
     Write-Host "  reset          Reset device by mcumgr."
     Write-Host "  image_list     List MCUboot images by mcumgr."
@@ -125,7 +125,7 @@ if ($command -eq "-version") {
 
 switch -CaseSensitive ($command) {
     "build" {
-        Invoke-WorkflowCommand -ScriptName "build.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "extra_conf") -SwitchNames @("pristine", "version")
+        Invoke-WorkflowCommand -ScriptName "build.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "extra_conf", "target") -SwitchNames @("pristine", "version")
     }
     "flash" {
         Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "runner", "target", "connection", "programmer") -SwitchNames @("include_bootloader", "dry_run", "version")

@@ -1,13 +1,15 @@
-# Version: 3.8.0
+# Version: 3.9.0
 param(
     [string]$config = "",
     [string]$board = "",
     [string]$extra_conf = "",
+    [ValidateSet("app", "all")]
+    [string]$target = "app",
     [switch]$pristine,
     [switch]$version
 )
 
-$ScriptVersion = "3.8.0"
+$ScriptVersion = "3.9.0"
 if ($version) {
     Write-Host "build.ps1 version $ScriptVersion"
     exit 0
@@ -25,6 +27,29 @@ $env:ZEPHYR_TOOLCHAIN_VARIANT = "zephyr"
 $env:ZEPHYR_SDK_INSTALL_DIR = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "ZephyrSdkInstallDir" $projectConfig.ZephyrSdkInstallDir) $projectConfig)
 
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
+$appBuildName = Require-ConfigValue "AppBuildName" $projectConfig.AppBuildName
+$appBuildDir = Join-Path $buildDir $appBuildName
+
+if ($target -eq "app") {
+    if ($pristine) {
+        Write-Error "App-only pristine build is not supported. Use .\dev.ps1 build -target all -pristine to reconfigure sysbuild."
+        exit 1
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($extra_conf)) {
+        Write-Error "App-only build cannot apply -extra_conf after CMake configuration. Use .\dev.ps1 build -target all -extra_conf <path>."
+        exit 1
+    }
+
+    if (-not (Test-Path $appBuildDir)) {
+        Write-Error "App build directory not found: $appBuildDir. Run .\dev.ps1 build -target all -pristine first."
+        exit 1
+    }
+
+    & cmake --build $appBuildDir
+    exit $LASTEXITCODE
+}
+
 $westArgs = @(
     "build", "--sysbuild",
     "-b", $board,

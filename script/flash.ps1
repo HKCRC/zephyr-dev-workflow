@@ -1,10 +1,10 @@
-# Version: 3.8.0
+# Version: 3.9.0
 param(
     [string]$config = "",
     [string]$board = "",
     [string]$runner = "",
-    [ValidateSet("west", "bootloader", "app", "all")]
-    [string]$target = "west",
+    [ValidateSet("app", "all", "bootloader", "west")]
+    [string]$target = "app",
     [string]$connection = "",
     [string]$programmer = "",
     [switch]$include_bootloader,
@@ -12,7 +12,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.8.0"
+$ScriptVersion = "3.9.0"
 if ($version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0

@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.9.0
+
+- Change `build` default target to `app`; use `build -target all` for sysbuild bootloader + app builds.
+- Change `flash` default target to `app`; use `flash -target all` to flash bootloader + app.
+- Keep `flash -target west` available as an explicit west runner path.
+
 ## 3.8.0
 
 - Add `reset` workflow command for `mcumgr reset`.

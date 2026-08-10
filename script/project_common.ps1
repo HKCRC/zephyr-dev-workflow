@@ -1,5 +1,5 @@
-# Version: 3.8.0
-$ProjectScriptVersion = "3.8.0"
+# Version: 3.9.0
+$ProjectScriptVersion = "3.9.0"
 $script:ProjectRoot = $null
 
 function Get-ProjectConfig {
