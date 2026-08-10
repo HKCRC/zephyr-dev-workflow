@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.11.0
+
+- Reset STM32 targets after successful STM32CubeProgrammer flashing so freshly flashed firmware starts immediately.
+
 ## 3.10.0
 
 - Add no-bootloader build support with `build -target none`.

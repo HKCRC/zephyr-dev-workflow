@@ -1,5 +1,5 @@
-# Version: 3.10.0
-$ScriptVersion = "3.10.0"
+# Version: 3.11.0
+$ScriptVersion = "3.11.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"

@@ -1,4 +1,4 @@
-# Version: 3.10.0
+# Version: 3.11.0
 param(
     [string]$config = "",
     [string]$board = "",
@@ -12,7 +12,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.10.0"
+$ScriptVersion = "3.11.0"
 if ($version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
@@ -87,6 +87,21 @@ function Flash-App {
         -Arguments @("-c", $connection, "-w", $appHex, "-v")
 }
 
+function Reset-Stm32Target {
+    $resetArgs = @("-c", $connection, "-rst")
+
+    Write-Host "Resetting target after flash..."
+    if ($dry_run) {
+        Write-Host "$programmer $($resetArgs -join ' ')"
+        return
+    }
+
+    & $programmer @resetArgs
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
+    }
+}
+
 function Flash-NoBootloaderApp {
     $appHex = Join-Path $buildDir "zephyr\zephyr.hex"
     Require-File $appHex
@@ -117,6 +132,10 @@ switch ($target) {
     "bootloader" { break }
     "app" { Flash-App; break }
     "all" { Flash-App; break }
+}
+
+if ($target -ne "west") {
+    Reset-Stm32Target
 }
 
 exit 0
