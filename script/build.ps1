@@ -1,15 +1,15 @@
-# Version: 3.10.0
+# Version: 4.0.0
 param(
     [string]$config = "",
     [string]$board = "",
     [string]$extra_conf = "",
-    [ValidateSet("none", "app", "all")]
+    [ValidateSet("no_bootloader", "app", "all")]
     [string]$target = "app",
     [switch]$pristine,
     [switch]$version
 )
 
-$ScriptVersion = "3.10.0"
+$ScriptVersion = "4.0.0"
 if ($version) {
     Write-Host "build.ps1 version $ScriptVersion"
     exit 0
@@ -19,18 +19,20 @@ if ($version) {
 
 $projectConfig = Get-ProjectConfig $config
 $projectRoot = Get-ProjectRoot
-$board = Use-ConfigValue $board $projectConfig.Board
-$board = Require-ConfigValue "Board" $board
+$board = Use-ConfigValue $board $projectConfig.BoardName
+$board = Require-ConfigValue "BoardName" $board
 
 $env:ZEPHYR_BASE = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "ZephyrBase" $projectConfig.ZephyrBase) $projectConfig)
 $env:ZEPHYR_TOOLCHAIN_VARIANT = "zephyr"
 $env:ZEPHYR_SDK_INSTALL_DIR = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "ZephyrSdkInstallDir" $projectConfig.ZephyrSdkInstallDir) $projectConfig)
 
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
-$appBuildName = Require-ConfigValue "AppBuildName" $projectConfig.AppBuildName
-$appBuildDir = Join-Path $buildDir $appBuildName
+$projectName = Require-ConfigValue "ProjectName" $projectConfig.ProjectName
+$appBuildDir = Join-Path $buildDir $projectName
+$extra_conf = Use-ConfigValue $extra_conf $projectConfig.ExtraConf
+$extra_conf = Expand-ProjectConfigValue $extra_conf $projectConfig
 
-if ($target -eq "none") {
+if ($target -eq "no_bootloader") {
     $westArgs = @(
         "build",
         "-b", $board,

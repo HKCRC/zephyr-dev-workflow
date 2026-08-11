@@ -1,4 +1,4 @@
-# Version: 3.10.0
+# Version: 4.0.0
 param(
     [string]$config = "",
     [string]$address = "",
@@ -9,7 +9,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.10.0"
+$ScriptVersion = "4.0.0"
 if ($version) {
     Write-Host "image_comfirm.ps1 version $ScriptVersion"
     exit 0
@@ -18,7 +18,8 @@ if ($version) {
 . "$PSScriptRoot\project_common.ps1"
 
 $projectConfig = Get-ProjectConfig $config
-$address = Use-ConfigValue $address $projectConfig.Address
+$address = Use-ConfigValue $address $projectConfig.OtaTarget
+$address = Expand-ProjectConfigValue $address $projectConfig
 $port = Use-ConfigValue $port $projectConfig.Port
 $conn_type = Use-ConfigValue $conn_type $projectConfig.ConnType
 $mcu_mgr = Use-ConfigValue $mcu_mgr $projectConfig.McuMgr

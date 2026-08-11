@@ -1,102 +1,102 @@
-ï»¿# zephyr-dev-workflow å‘½ä»¤è¡¨
+# zephyr-dev-workflow ÃüÁî±í
 
-æœ¬æ–‡åˆ—ä¸¾ `zephyr-dev-workflow` çš„ç¼–è¯‘ã€çƒ§å½•ã€OTA å’Œ MCUboot é•œåƒç®¡ç†å‘½ä»¤ã€‚å¯¹å¤–å‘½ä»¤å’Œå‚æ•°ç»Ÿä¸€ä½¿ç”¨å°å†™åŠ ä¸‹åˆ’çº¿ã€‚
+±¾ÎÄÁĞ¾Ù `zephyr-dev-workflow` µÄ±àÒë¡¢ÉÕÂ¼¡¢OTA ºÍ MCUboot ¾µÏñ¹ÜÀíÃüÁî¡£¶ÔÍâÃüÁîºÍ²ÎÊıÍ³Ò»Ê¹ÓÃĞ¡Ğ´¼ÓÏÂ»®Ïß¡£
 
-## åŸºæœ¬å…¥å£
+## »ù±¾Èë¿Ú
 
 ```powershell
 .\dev.ps1 <command> [options]
 ```
 
-| å‘½ä»¤ | è¯´æ˜ |
+| ÃüÁî | ËµÃ÷ |
 | --- | --- |
-| `.\dev.ps1 --help` | æŸ¥çœ‹å¸®åŠ©ã€‚ |
-| `.\dev.ps1 -version` | æŸ¥çœ‹ dispatcher ç‰ˆæœ¬ã€‚ |
-| `.\dev.ps1 build` | ç¼–è¯‘ MCUboot app å­å·¥ç¨‹ã€‚ |
-| `.\dev.ps1 build -target none` | æ—  bootloader æ™®é€š Zephyr app ç¼–è¯‘ã€‚ |
-| `.\dev.ps1 build -target all` | ç¼–è¯‘ bootloader + app çš„å®Œæ•´ sysbuild å·¥ç¨‹ã€‚ |
-| `.\dev.ps1 flash` | çƒ§å½• MCUboot app åº”ç”¨åŒºé•œåƒã€‚ |
-| `.\dev.ps1 flash -target none` | æ—  bootloader æ™®é€š Zephyr app çƒ§å½•ã€‚ |
-| `.\dev.ps1 flash -target all` | å…ˆçƒ§å½• bootloaderï¼Œå†çƒ§å½• appã€‚ |
-| `.\dev.ps1 ota` | æ‰§è¡Œ MCUboot/mcumgr OTAã€‚ |
-| `.\dev.ps1 reset` | é€šè¿‡ mcumgr é‡å¯è®¾å¤‡ã€‚ |
-| `.\dev.ps1 image_list` | æŸ¥è¯¢ MCUboot é•œåƒåˆ—è¡¨ã€‚ |
-| `.\dev.ps1 image_confirm` | ç¡®è®¤å½“å‰è¿è¡Œé•œåƒæœ‰æ•ˆã€‚ |
+| `.\dev.ps1 --help` | ²é¿´°ïÖú¡£ |
+| `.\dev.ps1 -version` | ²é¿´ dispatcher °æ±¾¡£ |
+| `.\dev.ps1 build` | ±àÒë MCUboot app ×Ó¹¤³Ì¡£ |
+| `.\dev.ps1 build -target no_bootloader` | ÎŞ bootloader ÆÕÍ¨ Zephyr app ±àÒë¡£ |
+| `.\dev.ps1 build -target all` | ±àÒë bootloader + app µÄÍêÕû sysbuild ¹¤³Ì¡£ |
+| `.\dev.ps1 flash` | ÉÕÂ¼ MCUboot app Ó¦ÓÃÇø¾µÏñ¡£ |
+| `.\dev.ps1 flash -target no_bootloader` | ÎŞ bootloader ÆÕÍ¨ Zephyr app ÉÕÂ¼¡£ |
+| `.\dev.ps1 flash -target all` | ÏÈÉÕÂ¼ bootloader£¬ÔÙÉÕÂ¼ app¡£ |
+| `.\dev.ps1 ota` | Ö´ĞĞ MCUboot/mcumgr OTA¡£ |
+| `.\dev.ps1 reset` | Í¨¹ı mcumgr ÖØÆôÉè±¸¡£ |
+| `.\dev.ps1 image_list` | ²éÑ¯ MCUboot ¾µÏñÁĞ±í¡£ |
+| `.\dev.ps1 image_confirm` | È·ÈÏµ±Ç°ÔËĞĞ¾µÏñÓĞĞ§¡£ |
 
 ## build
 
 ```powershell
-.\dev.ps1 build [-target none|app|all] [-board <board>] [-extra_conf <path>] [-pristine] [-config <path>] [-version]
+.\dev.ps1 build [-target no_bootloader|app|all] [-board <board>] [-extra_conf <path>] [-pristine] [-config <path>] [-version]
 ```
 
-| å‚æ•° | é»˜è®¤å€¼ | è¯´æ˜ |
+| ²ÎÊı | Ä¬ÈÏÖµ | ËµÃ÷ |
 | --- | --- | --- |
-| `-target <target>` | `app` | `none`ï¼šæ™®é€š Zephyr appï¼Œæ—  bootloaderï¼›`app`ï¼šåªç¼–è¯‘å·²é…ç½®çš„ MCUboot app å­å·¥ç¨‹ï¼›`all`ï¼šsysbuild ç¼–è¯‘ bootloader + appã€‚ |
-| `-board <board>` | `Base.Board` | Zephyr board åã€‚ |
-| `-extra_conf <path>` | ç©º | é¢å¤– Kconfig é…ç½®æ–‡ä»¶ã€‚ |
-| `-pristine` | å…³é—­ | `none` å’Œ `all` ç›®æ ‡å¯ç”¨ï¼Œç”¨äºé‡æ–°é…ç½®ï¼›`app` å­å·¥ç¨‹æ„å»ºä¸æ”¯æŒã€‚ |
-| `-config <path>` | `project_config.json` | æŒ‡å®šé¡¹ç›®é…ç½®æ–‡ä»¶ã€‚ |
-| `-version` | å…³é—­ | æ˜¾ç¤º build è„šæœ¬ç‰ˆæœ¬ã€‚ |
+| `-target <target>` | `app` | `no_bootloader`£ºÆÕÍ¨ Zephyr app£¬ÎŞ bootloader£»`app`£ºÖ»±àÒëÒÑÅäÖÃµÄ MCUboot app ×Ó¹¤³Ì£»`all`£ºsysbuild ±àÒë bootloader + app¡£ |
+| `-board <board>` | `Base.BoardName` | Zephyr board Ãû¡£ |
+| `-extra_conf <path>` | ¿Õ | ¶îÍâ Kconfig ÅäÖÃÎÄ¼ş¡£ |
+| `-pristine` | ¹Ø±Õ | `no_bootloader` ºÍ `all` Ä¿±ê¿ÉÓÃ£¬ÓÃÓÚÖØĞÂÅäÖÃ£»`app` ×Ó¹¤³Ì¹¹½¨²»Ö§³Ö¡£ |
+| `-config <path>` | `project_config.json` | Ö¸¶¨ÏîÄ¿ÅäÖÃÎÄ¼ş¡£ |
+| `-version` | ¹Ø±Õ | ÏÔÊ¾ build ½Å±¾°æ±¾¡£ |
 
-å¸¸ç”¨ç¤ºä¾‹ï¼š
+³£ÓÃÊ¾Àı£º
 
 ```powershell
 .\dev.ps1 build
-.\dev.ps1 build -target none -pristine
+.\dev.ps1 build -target no_bootloader -pristine
 .\dev.ps1 build -target all -pristine
 ```
 
 ## flash
 
 ```powershell
-.\dev.ps1 flash [-target none|app|all|bootloader|west] [-board <board>] [-runner <runner>] [-connection <connection>] [-programmer <programmer>] [-include_bootloader] [-dry_run] [-config <path>] [-version]
+.\dev.ps1 flash [-target no_bootloader|app|all|bootloader|west] [-board <board>] [-runner <runner>] [-connection <connection>] [-programmer <programmer>] [-include_bootloader] [-dry_run] [-config <path>] [-version]
 ```
 
-| å‚æ•° | é»˜è®¤å€¼ | è¯´æ˜ |
+| ²ÎÊı | Ä¬ÈÏÖµ | ËµÃ÷ |
 | --- | --- | --- |
-| `-target <target>` | `app` | `none`ï¼šçƒ§æ™®é€š app `zephyr.hex`ï¼›`app`ï¼šçƒ§ MCUboot appï¼›`all`ï¼šçƒ§ bootloader + appï¼›`bootloader`ï¼šåªçƒ§ bootloaderï¼›`west`ï¼šç›´æ¥èµ° west runnerã€‚ |
-| `-runner <runner>` | `Flash.FlashRunner` | west flash runnerã€‚ |
-| `-connection <connection>` | `Flash.FlashConnection` | STM32CubeProgrammer è¿æ¥å‚æ•°ï¼Œä¾‹å¦‚ `port=SWD`ã€‚ |
-| `-programmer <programmer>` | `Flash.FlashProgrammer` | STM32CubeProgrammer å‘½ä»¤æˆ–å®Œæ•´è·¯å¾„ã€‚ |
-| `-dry_run` | å…³é—­ | åªæ‰“å°å‘½ä»¤ï¼Œä¸å®é™…çƒ§å½•ã€‚ |
-| `-config <path>` | `project_config.json` | æŒ‡å®šé¡¹ç›®é…ç½®æ–‡ä»¶ã€‚ |
-| `-version` | å…³é—­ | æ˜¾ç¤º flash è„šæœ¬ç‰ˆæœ¬ã€‚ |
+| `-target <target>` | `app` | `no_bootloader`£ºÉÕÆÕÍ¨ app `zephyr.hex`£»`app`£ºÉÕ MCUboot app£»`all`£ºÉÕ bootloader + app£»`bootloader`£ºÖ»ÉÕ bootloader£»`west`£ºÖ±½Ó×ß west runner¡£ |
+| `-runner <runner>` | `Flash.FlashRunner` | west flash runner¡£ |
+| `-connection <connection>` | `Flash.FlashConnection` | STM32CubeProgrammer Á¬½Ó²ÎÊı£¬ÀıÈç `port=SWD`¡£ |
+| `-programmer <programmer>` | `Flash.FlashProgrammer` | STM32CubeProgrammer ÃüÁî»òÍêÕûÂ·¾¶¡£ |
+| `-dry_run` | ¹Ø±Õ | Ö»´òÓ¡ÃüÁî£¬²»Êµ¼ÊÉÕÂ¼¡£ |
+| `-config <path>` | `project_config.json` | Ö¸¶¨ÏîÄ¿ÅäÖÃÎÄ¼ş¡£ |
+| `-version` | ¹Ø±Õ | ÏÔÊ¾ flash ½Å±¾°æ±¾¡£ |
 
-å¸¸ç”¨ç¤ºä¾‹ï¼š
+³£ÓÃÊ¾Àı£º
 
 ```powershell
 .\dev.ps1 flash
-.\dev.ps1 flash -target none
-.\dev.ps1 flash -target none -dry_run
+.\dev.ps1 flash -target no_bootloader
+.\dev.ps1 flash -target no_bootloader -dry_run
 .\dev.ps1 flash -target all
 .\dev.ps1 flash -target west
 ```
 
-## æ—  bootloader æµç¨‹
+## ÎŞ bootloader Á÷³Ì
 
-æ—  bootloader é¡¹ç›®ä½¿ç”¨æ™®é€š Zephyr æ„å»ºï¼Œä¸å¯ç”¨ sysbuildï¼Œä¸ç”Ÿæˆ MCUboot signed é•œåƒï¼š
+ÎŞ bootloader ÏîÄ¿Ê¹ÓÃÆÕÍ¨ Zephyr ¹¹½¨£¬²»ÆôÓÃ sysbuild£¬²»Éú³É MCUboot signed ¾µÏñ£º
 
 ```powershell
-.\dev.ps1 build -target none -pristine
-.\dev.ps1 flash -target none
+.\dev.ps1 build -target no_bootloader -pristine
+.\dev.ps1 flash -target no_bootloader
 ```
 
-çƒ§å½•æ–‡ä»¶ä¸ºï¼š
+ÉÕÂ¼ÎÄ¼şÎª£º
 
 ```text
 <BuildDir>\zephyr\zephyr.hex
 ```
 
-## MCUboot æµç¨‹
+## MCUboot Á÷³Ì
 
-é¦–æ¬¡å®Œæ•´æ„å»ºå’Œçƒ§å½•ï¼š
+Ê×´ÎÍêÕû¹¹½¨ºÍÉÕÂ¼£º
 
 ```powershell
 .\dev.ps1 build -target all -pristine
 .\dev.ps1 flash -target all
 ```
 
-æ—¥å¸¸ MCUboot app å­å·¥ç¨‹ç¼–è¯‘å’Œåº”ç”¨åŒºçƒ§å½•ï¼š
+ÈÕ³£ MCUboot app ×Ó¹¤³Ì±àÒëºÍÓ¦ÓÃÇøÉÕÂ¼£º
 
 ```powershell
 .\dev.ps1 build
@@ -112,4 +112,4 @@
 .\dev.ps1 reset
 ```
 
-OTA ä»…é€‚ç”¨äºå¯ç”¨ MCUboot + mcumgr çš„é¡¹ç›®ã€‚æ—  bootloader é¡¹ç›®ä¸ä½¿ç”¨ OTA å‘½ä»¤ã€‚
+OTA ½öÊÊÓÃÓÚÆôÓÃ MCUboot + mcumgr µÄÏîÄ¿¡£ÎŞ bootloader ÏîÄ¿²»Ê¹ÓÃ OTA ÃüÁî¡£

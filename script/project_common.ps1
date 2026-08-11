@@ -1,15 +1,16 @@
-# Version: 3.11.0
-$ProjectScriptVersion = "3.11.0"
+# Version: 4.0.0
+$ProjectScriptVersion = "4.0.0"
 $script:ProjectRoot = $null
 
 function Get-ProjectConfig {
     param([string]$ConfigPath)
 
     $defaults = @{
-        Board = ""
-        AppName = ""
-        AppBuildName = ""
-        Address = ""
+        BoardName = ""
+        ProjectName = ""
+        ProductId = ""
+        DeviceId = ""
+        OtaTarget = ""
         Port = 1337
         ConnType = "udp"
         McuMgr = "mcumgr"
@@ -20,6 +21,7 @@ function Get-ProjectConfig {
         ZephyrBase = ""
         ZephyrSdkInstallDir = ""
         BuildDir = ""
+        ExtraConf = ""
         BootloaderHexPath = ""
         AppConfirmedHexPath = ""
         AppSignedBinPath = ""

@@ -1,5 +1,5 @@
-# Version: 3.11.0
-$ScriptVersion = "3.11.0"
+# Version: 4.0.0
+$ScriptVersion = "4.0.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
@@ -11,8 +11,9 @@ function Show-Help {
     Write-Host "  .\workflow.ps1 <command> [options]"
     Write-Host ""
     Write-Host "Commands:"
-    Write-Host "  build          Build MCUboot app by default; use -target none for no bootloader."
-    Write-Host "  flash          Flash MCUboot app by default; use -target none for no bootloader."
+    Write-Host "  build          Build MCUboot app by default; use -target no_bootloader for direct app without bootloader."
+    Write-Host "  menuconfig     Open Zephyr menuconfig for the configured build directory."
+    Write-Host "  flash          Flash MCUboot app by default; use -target no_bootloader for direct app without bootloader."
     Write-Host "  ota            Upload and test an MCUboot OTA image."
     Write-Host "  reset          Reset device by mcumgr."
     Write-Host "  image_list     List MCUboot images by mcumgr."
@@ -129,6 +130,9 @@ if ($command -eq "-version") {
 switch -CaseSensitive ($command) {
     "build" {
         Invoke-WorkflowCommand -ScriptName "build.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "extra_conf", "target") -SwitchNames @("pristine", "version")
+    }
+    "menuconfig" {
+        Invoke-WorkflowCommand -ScriptName "menuconfig.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "target") -SwitchNames @("dry_run", "version")
     }
     "flash" {
         Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "runner", "target", "connection", "programmer") -SwitchNames @("include_bootloader", "dry_run", "version")

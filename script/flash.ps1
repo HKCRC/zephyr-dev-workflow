@@ -1,9 +1,9 @@
-# Version: 3.11.0
+# Version: 4.0.0
 param(
     [string]$config = "",
     [string]$board = "",
     [string]$runner = "",
-    [ValidateSet("none", "app", "all", "bootloader", "west")]
+    [ValidateSet("no_bootloader", "app", "all", "bootloader", "west")]
     [string]$target = "app",
     [string]$connection = "",
     [string]$programmer = "",
@@ -12,7 +12,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "3.11.0"
+$ScriptVersion = "4.0.0"
 if ($version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
@@ -21,12 +21,12 @@ if ($version) {
 . "$PSScriptRoot\project_common.ps1"
 
 $projectConfig = Get-ProjectConfig $config
-$board = Use-ConfigValue $board $projectConfig.Board
+$board = Use-ConfigValue $board $projectConfig.BoardName
 $runner = Use-ConfigValue $runner $projectConfig.FlashRunner
 $connection = Use-ConfigValue $connection $projectConfig.FlashConnection
 $programmer = Use-ConfigValue $programmer $projectConfig.FlashProgrammer
 
-$board = Require-ConfigValue "Board" $board
+$board = Require-ConfigValue "BoardName" $board
 $runner = Require-ConfigValue "FlashRunner" $runner
 $connection = Require-ConfigValue "FlashConnection" $connection
 $programmer = Require-ConfigValue "FlashProgrammer" $programmer
@@ -128,7 +128,7 @@ if ($include_bootloader -or $target -eq "bootloader" -or $target -eq "all") {
 }
 
 switch ($target) {
-    "none" { Flash-NoBootloaderApp; break }
+    "no_bootloader" { Flash-NoBootloaderApp; break }
     "bootloader" { break }
     "app" { Flash-App; break }
     "all" { Flash-App; break }

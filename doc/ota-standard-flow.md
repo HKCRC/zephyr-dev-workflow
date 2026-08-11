@@ -6,7 +6,7 @@
 | 项目 | 要求 |
 | --- | --- |
 | 固件 | 已启�?MCUboot �?mcumgr�?|
-| 网络 | PC 可以访问 MCU �?IP。当前默�?OTA 地址来自 `project_config.json` �?`Ota.Address`�?|
+| 网络 | PC 可以访问 MCU �?IP。当前默�?OTA 地址来自 `project_config.json` �?`Base.OtaTarget`�?|
 | 工具 | PC 已安�?`mcumgr`，并且命令可执行�?|
 | 构建 | 已通过 `.\dev.ps1 build` 生成 signed OTA 镜像�?|
 
