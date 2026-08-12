@@ -29,6 +29,7 @@ $env:ZEPHYR_SDK_INSTALL_DIR = Resolve-ProjectPath (Expand-ProjectConfigValue (Re
 $buildDir = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BuildDir" $projectConfig.BuildDir) $projectConfig)
 $projectName = Require-ConfigValue "ProjectName" $projectConfig.ProjectName
 $appBuildDir = Join-Path $buildDir $projectName
+$extraConfExplicit = $PSBoundParameters.ContainsKey("extra_conf")
 $extra_conf = Use-ConfigValue $extra_conf $projectConfig.ExtraConf
 $extra_conf = Expand-ProjectConfigValue $extra_conf $projectConfig
 
@@ -71,7 +72,7 @@ if ($target -eq "app") {
         exit 1
     }
 
-    if (-not [string]::IsNullOrWhiteSpace($extra_conf)) {
+    if ($extraConfExplicit) {
         Write-Error "App-only build cannot apply -extra_conf after CMake configuration. Use .\dev.ps1 build -target all -extra_conf <path>."
         exit 1
     }
