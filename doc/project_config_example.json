@@ -5,7 +5,7 @@
     "ProjectName": "craner_project_example",
     "ProductId": 1,
     "DeviceId": 36,
-    "OtaTarget": "192.168.{ProductId}.{DeviceId}",
+    "OtaTarget": "192.168.101.36",
     "ZephyrBase": "../zephyrproject/zephyr",
     "ZephyrSdkInstallDir": "../zephyr-sdk-1.0.1/zephyr-sdk-1.0.1"
   },

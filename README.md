@@ -33,6 +33,30 @@ Project-specific values stay in each firmware repository's `project_config.json`
 The script resolves relative paths from that config file's directory, so this
 repository can be used as a Git submodule.
 
+## Project Config Convention
+
+`ProductId` and `DeviceId` are project metadata. A project may use them for
+product-specific configuration fragments, build records, device labels, or test
+reports.
+
+`OtaTarget` is the actual network address used by `ota`, `reset`, `image_list`,
+and `image_confirm`. Keep it as an explicit value in `project_config.json`.
+Do not assume it must be generated from `ProductId` and `DeviceId`; company lab
+networks, DHCP reservations, rescue networks, and field routers often need an
+independent OTA target address.
+
+Recommended example:
+
+```json
+{
+  "Base": {
+    "ProductId": 1,
+    "DeviceId": 36,
+    "OtaTarget": "192.168.101.36"
+  }
+}
+```
+
 ## Documents
 
 - `doc/command-table.md`: command and parameter reference for build, flash, OTA,
