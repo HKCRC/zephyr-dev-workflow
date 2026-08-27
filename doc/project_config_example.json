@@ -10,7 +10,8 @@
     "ZephyrSdkInstallDir": "../zephyr-sdk-1.0.1/zephyr-sdk-1.0.1"
   },
   "Build": {
-    "BuildDir": "build/{BoardName}"
+    "BuildDir": "build/{BoardName}",
+    "ExtraConf": "config/product_{ProductId}.conf"
   },
   "Flash": {
     "FlashRunner": "stm32cubeprogrammer",

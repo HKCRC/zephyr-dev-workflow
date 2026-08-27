@@ -33,6 +33,14 @@ Project-specific values stay in each firmware repository's `project_config.json`
 The script resolves relative paths from that config file's directory, so this
 repository can be used as a Git submodule.
 
+## Project Templates
+
+When adding this workflow to a firmware project, copy these templates to the
+project root and then adjust the project-specific values:
+
+- `doc/dev.ps1`: root command entry template.
+- `doc/project_config_example.json`: v4 project configuration template.
+
 ## Project Config Convention
 
 `ProductId` and `DeviceId` are project metadata. A project may use them for
@@ -63,3 +71,5 @@ Recommended example:
   and MCUboot image management workflows.
 - `doc/migration-and-usage.md`: migration guide for adding this tool to a Zephyr
   project and daily usage guide for new developers.
+- `doc/project_config_example.json`: reusable `project_config.json` template.
+- `doc/dev.ps1`: reusable root `dev.ps1` template.
