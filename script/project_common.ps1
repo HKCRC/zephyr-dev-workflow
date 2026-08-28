@@ -22,6 +22,7 @@ function Get-ProjectConfig {
         ZephyrSdkInstallDir = ""
         BuildDir = ""
         ExtraConf = ""
+        SysbuildConf = ""
         BootloaderHexPath = ""
         AppConfirmedHexPath = ""
         AppSignedBinPath = ""

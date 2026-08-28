@@ -11,7 +11,8 @@
   },
   "Build": {
     "BuildDir": "build/{BoardName}",
-    "ExtraConf": "config/product_{ProductId}.conf"
+    "ExtraConf": "config/product_{ProductId}.conf",
+    "SysbuildConf": "config/product_{ProductId}_sysbuild.conf"
   },
   "Flash": {
     "FlashRunner": "stm32cubeprogrammer",

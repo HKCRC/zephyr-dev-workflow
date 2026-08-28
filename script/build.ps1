@@ -19,6 +19,7 @@ if ($version) {
 
 $projectConfig = Get-ProjectConfig $config
 $projectRoot = Get-ProjectRoot
+$projectRootArg = $projectRoot.Replace("\", "/")
 $board = Use-ConfigValue $board $projectConfig.BoardName
 $board = Require-ConfigValue "BoardName" $board
 
@@ -32,6 +33,7 @@ $appBuildDir = Join-Path $buildDir $projectName
 $extraConfExplicit = $PSBoundParameters.ContainsKey("extra_conf")
 $extra_conf = Use-ConfigValue $extra_conf $projectConfig.ExtraConf
 $extra_conf = Expand-ProjectConfigValue $extra_conf $projectConfig
+$sysbuild_conf = Expand-ProjectConfigValue $projectConfig.SysbuildConf $projectConfig
 
 if ($target -eq "no_bootloader") {
     $westArgs = @(
@@ -40,7 +42,8 @@ if ($target -eq "no_bootloader") {
         $projectRoot,
         "-d", $buildDir,
         "--",
-        "-DBOARD_ROOT=$projectRoot"
+        "-DAPP_DIR=$projectRootArg",
+        "-DBOARD_ROOT=$projectRootArg"
     )
 
     if ($pristine) {
@@ -92,7 +95,8 @@ $westArgs = @(
     $projectRoot,
     "-d", $buildDir,
     "--",
-    "-DBOARD_ROOT=$projectRoot"
+    "-DAPP_DIR=$projectRootArg",
+    "-DBOARD_ROOT=$projectRootArg"
 )
 
 if ($pristine) {
@@ -112,6 +116,48 @@ if (-not [string]::IsNullOrWhiteSpace($extra_conf)) {
     }
 
     $westArgs += "-DEXTRA_CONF_FILE=$extraConfPath"
+}
+
+if (-not [string]::IsNullOrWhiteSpace($sysbuild_conf)) {
+    $sysbuildConfPath = if ([System.IO.Path]::IsPathRooted($sysbuild_conf)) {
+        $sysbuild_conf
+    } else {
+        Join-Path $projectRoot $sysbuild_conf
+    }
+
+    if (-not (Test-Path $sysbuildConfPath)) {
+        Write-Error "Sysbuild config file not found: $sysbuildConfPath"
+        exit 1
+    }
+
+    $effectiveSysbuildConfPath = $sysbuildConfPath
+    $sysbuildConfText = Get-Content -Path $sysbuildConfPath -Raw
+    if ($sysbuildConfText -match '(?m)^\s*SB_CONFIG_BOOT_SIGNATURE_KEY_FILE\s*=\s*"([^"]+)"') {
+        $bootSignatureKeyLine = $Matches[0]
+        $bootSignatureKeyFile = $Matches[1]
+        $bootSignatureKeyPath = if ([System.IO.Path]::IsPathRooted($bootSignatureKeyFile)) {
+            $bootSignatureKeyFile
+        } else {
+            Join-Path $projectRoot $bootSignatureKeyFile
+        }
+
+        if (-not (Test-Path $bootSignatureKeyPath)) {
+            Write-Error "Boot signature key file not found: $bootSignatureKeyPath"
+            exit 1
+        }
+
+        $bootSignatureKeyPath = $bootSignatureKeyPath.Replace("\", "/")
+        $sysbuildConfText = $sysbuildConfText.Replace(
+            $bootSignatureKeyLine,
+            "SB_CONFIG_BOOT_SIGNATURE_KEY_FILE=`"$bootSignatureKeyPath`""
+        )
+        $effectiveSysbuildConfPath = Join-Path ([System.IO.Path]::GetTempPath()) (
+            "craner_atc_sysbuild_" + [System.Guid]::NewGuid().ToString("N") + ".conf"
+        )
+        Set-Content -Path $effectiveSysbuildConfPath -Value $sysbuildConfText -NoNewline -Encoding ascii
+    }
+
+    $westArgs += "-DSB_CONF_FILE=$effectiveSysbuildConfPath"
 }
 
 & python -m west @westArgs
