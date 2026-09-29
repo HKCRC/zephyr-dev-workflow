@@ -81,20 +81,9 @@ function Invoke-McuMgrUpload {
         return
     }
 
-    if ($raw_upload_output) {
-        & $mcu_mgr @Arguments
-        if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-        }
-        return
-    }
-
-    $output = & $mcu_mgr @Arguments 2>&1
-    $exitCode = $LASTEXITCODE
-
-    if ($exitCode -ne 0) {
-        $output | ForEach-Object { Write-Host $_ }
-        exit $exitCode
+    & $mcu_mgr @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
     }
 
     Write-Host "Upload complete."
