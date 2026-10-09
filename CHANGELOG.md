@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.0.0
+
+- Add `image upload`, `image test <hash>`, `image reset`, `image list`, and `image confirm` subcommands.
+- Replace the public `image_list`, `image_confirm`, and `reset` commands with the `image` command group.
+- Change `ota` to upload and mark the image for test boot without automatically resetting the device.
+- Upgrade workflow scripts and the project configuration schema to version 5.0.0.
+
 ## 3.11.0
 
 - Reset STM32 targets after successful STM32CubeProgrammer flashing so freshly flashed firmware starts immediately.
