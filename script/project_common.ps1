@@ -25,6 +25,7 @@ function Get-ProjectConfig {
         SysbuildConf = ""
         BootloaderHexPath = ""
         AppConfirmedHexPath = ""
+        OptionBytes = $null
         AppSignedBinPath = ""
         AppSignedHexPath = ""
         OtaOutputDir = ""

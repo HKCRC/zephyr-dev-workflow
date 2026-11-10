@@ -135,7 +135,7 @@ switch -CaseSensitive ($command) {
         Invoke-WorkflowCommand -ScriptName "menuconfig.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "target") -SwitchNames @("dry_run", "version")
     }
     "flash" {
-        Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "runner", "target", "connection", "programmer") -SwitchNames @("include_bootloader", "dry_run", "version")
+        Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "runner", "target", "connection", "programmer") -SwitchNames @("include_bootloader", "skip_option_bytes", "dry_run", "version")
     }
     "ota" {
         Invoke-WorkflowCommand -ScriptName "ota.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "address", "port", "conn_type", "mcu_mgr", "image_path") -SwitchNames @("skip_upload", "skip_reset", "dry_run", "raw_upload_output", "version")
