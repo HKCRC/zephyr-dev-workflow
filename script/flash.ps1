@@ -1,4 +1,4 @@
-# Version: 4.0.0
+# Version: 4.1.0
 param(
     [string]$config = "",
     [string]$board = "",
@@ -13,7 +13,7 @@ param(
     [switch]$version
 )
 
-$ScriptVersion = "4.0.0"
+$ScriptVersion = "4.1.0"
 if ($version) {
     Write-Host "flash.ps1 version $ScriptVersion"
     exit 0
@@ -31,6 +31,18 @@ $board = Require-ConfigValue "BoardName" $board
 $runner = Require-ConfigValue "FlashRunner" $runner
 $connection = Require-ConfigValue "FlashConnection" $connection
 $programmer = Require-ConfigValue "FlashProgrammer" $programmer
+
+function Get-UnderResetConnection {
+    param([string]$Value)
+
+    if ($Value -notmatch '(^|\s)mode=') {
+        return "$Value mode=UR"
+    }
+
+    return $Value
+}
+
+$connection = Get-UnderResetConnection $connection
 
 $env:ZEPHYR_BASE = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "ZephyrBase" $projectConfig.ZephyrBase) $projectConfig)
 $env:ZEPHYR_TOOLCHAIN_VARIANT = "zephyr"
@@ -52,55 +64,15 @@ function Require-File {
     }
 }
 
-function Invoke-Stm32Programmer {
-    param(
-        [string[]]$Arguments,
-        [string]$Description
-    )
+function Get-HexPath {
+    param([string]$PropertyName)
 
-    Write-Host $Description
-    if ($dry_run) {
-        Write-Host "$programmer $($Arguments -join ' ')"
-        return
-    }
-
-    & $programmer @Arguments
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
-    }
-}
-
-function Flash-Bootloader {
-    $bootloaderHex = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "BootloaderHexPath" $projectConfig.BootloaderHexPath) $projectConfig)
-    Require-File $bootloaderHex
-
-    Invoke-Stm32Programmer `
-        -Description "Flashing MCUboot bootloader to boot_partition..." `
-        -Arguments @("-c", $connection, "-w", $bootloaderHex, "-v")
-}
-
-function Flash-App {
-    $appHex = Resolve-ProjectPath (Expand-ProjectConfigValue (Require-ConfigValue "AppConfirmedHexPath" $projectConfig.AppConfirmedHexPath) $projectConfig)
-    Require-File $appHex
-
-    Invoke-Stm32Programmer `
-        -Description "Flashing confirmed application image to slot0_partition..." `
-        -Arguments @("-c", $connection, "-w", $appHex, "-v")
-}
-
-function Reset-Stm32Target {
-    $resetArgs = @("-c", $connection, "-rst")
-
-    Write-Host "Resetting target after flash..."
-    if ($dry_run) {
-        Write-Host "$programmer $($resetArgs -join ' ')"
-        return
-    }
-
-    & $programmer @resetArgs
-    if ($LASTEXITCODE -ne 0) {
-        exit $LASTEXITCODE
-    }
+    $path = Resolve-ProjectPath (
+        Expand-ProjectConfigValue `
+            (Require-ConfigValue $PropertyName $projectConfig.$PropertyName) `
+            $projectConfig)
+    Require-File $path
+    return $path
 }
 
 function Get-OptionByteAssignments {
@@ -178,61 +150,49 @@ function Test-OptionBytesMatch {
     return $true
 }
 
-function Get-CurrentOptionBytes {
-    $result = & $programmer @("-c", $connection, "-ob", "displ") 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Failed to read Option Bytes from target."
-        exit $LASTEXITCODE
+function Invoke-CombinedFlash {
+    param(
+        [string[]]$Images,
+        [bool]$ProgramOptionBytes
+    )
+
+    $arguments = @("-c", $connection, "-halt")
+    foreach ($image in $Images) {
+        $arguments += @("-w", $image, "-v", "fast")
     }
-
-    return @($result | ForEach-Object { [string]$_ })
-}
-
-function Configure-OptionBytes {
-    $script:optionByteAssignments = @(Get-OptionByteAssignments)
-    if ($skip_option_bytes -or $optionByteAssignments.Count -eq 0) {
-        return
+    if ($ProgramOptionBytes) {
+        $arguments += @("-ob") + $optionByteAssignments +
+            @("-noreconnect", "-ob", "displ")
     }
+    $arguments += @("-rst")
 
-    $programArgs = @("-c", $connection, "-ob") + $optionByteAssignments
-    $displayArgs = @("-c", $connection, "-ob", "displ")
-
+    $description = "Flashing $($Images.Count) image(s)"
+    if ($ProgramOptionBytes) {
+        $description += " and programming Option Bytes"
+    }
+    $description += " in one CubeProgrammer session..."
+    Write-Host $description
     if ($dry_run) {
-        Write-Host "Checking and configuring Option Bytes..."
-        Write-Host "$programmer $($displayArgs -join ' ')"
-        Write-Host "$programmer $($programArgs -join ' ')"
-        Write-Host "$programmer $($displayArgs -join ' ')"
+        Write-Host "$programmer $($arguments -join ' ')"
         return
     }
 
-    Write-Host "Checking Option Bytes..."
-    $currentValues = Get-OptionByteValues (Get-CurrentOptionBytes)
-    if (Test-OptionBytesMatch $currentValues) {
-        Write-Host "Option Bytes already match the project configuration."
-        return
+    $result = & $programmer @arguments 2>&1
+    $exitCode = $LASTEXITCODE
+    $result | ForEach-Object { Write-Host ([string]$_) }
+    if ($exitCode -ne 0) {
+        exit $exitCode
     }
 
-    Invoke-Stm32Programmer `
-        -Description "Configuring project Option Bytes..." `
-        -Arguments $programArgs
-
-    Write-Host "Verifying Option Bytes..."
-    $verifiedValues = Get-OptionByteValues (Get-CurrentOptionBytes)
-    if (-not (Test-OptionBytesMatch $verifiedValues)) {
-        Write-Error "Option Byte verification failed. Expected: $($optionByteAssignments -join ', ')"
-        exit 1
+    if ($ProgramOptionBytes) {
+        $verifiedValues = Get-OptionByteValues (
+            @($result | ForEach-Object { [string]$_ }))
+        if (-not (Test-OptionBytesMatch $verifiedValues)) {
+            Write-Error "Option Byte verification failed in the flash session. Expected: $($optionByteAssignments -join ', ')"
+            exit 1
+        }
+        Write-Host "Option Bytes verified in the flash session."
     }
-
-    Write-Host "Option Bytes verified."
-}
-
-function Flash-NoBootloaderApp {
-    $appHex = Join-Path $buildDir "zephyr\zephyr.hex"
-    Require-File $appHex
-
-    Invoke-Stm32Programmer `
-        -Description "Flashing application image without bootloader..." `
-        -Arguments @("-c", $connection, "-w", $appHex, "-v")
 }
 
 if ($target -eq "west") {
@@ -247,20 +207,41 @@ if ($target -eq "west") {
     exit $LASTEXITCODE
 }
 
-if ($include_bootloader -or $target -eq "bootloader" -or $target -eq "all") {
-    Flash-Bootloader
+$images = @()
+$flashBootloader = (
+    $include_bootloader -or
+    $target -eq "bootloader" -or
+    $target -eq "all"
+)
+$flashApplication = (
+    $target -eq "app" -or
+    $target -eq "all" -or
+    $target -eq "no_bootloader"
+)
+
+if ($flashBootloader) {
+    $images += Get-HexPath "BootloaderHexPath"
+}
+if ($flashApplication) {
+    if ($target -eq "no_bootloader") {
+        $appHex = Join-Path $buildDir "zephyr\zephyr.hex"
+        Require-File $appHex
+        $images += $appHex
+    } else {
+        $images += Get-HexPath "AppConfirmedHexPath"
+    }
 }
 
-switch ($target) {
-    "no_bootloader" { Flash-NoBootloaderApp; break }
-    "bootloader" { break }
-    "app" { Flash-App; break }
-    "all" { Flash-App; break }
+if ($images.Count -eq 0) {
+    Write-Error "No firmware image selected for target '$target'."
+    exit 1
 }
 
-if ($target -ne "west") {
-    Configure-OptionBytes
-    Reset-Stm32Target
-}
+$script:optionByteAssignments = @(Get-OptionByteAssignments)
+$programOptionBytes = (
+    -not $skip_option_bytes -and
+    $optionByteAssignments.Count -gt 0
+)
+Invoke-CombinedFlash -Images $images -ProgramOptionBytes $programOptionBytes
 
 exit 0
