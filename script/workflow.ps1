@@ -1,5 +1,5 @@
-# Version: 4.0.0
-$ScriptVersion = "4.0.0"
+# Version: 5.0.0
+$ScriptVersion = "5.0.0"
 
 function Show-Help {
     Write-Host "zephyr-dev-workflow $ScriptVersion"
@@ -14,10 +14,12 @@ function Show-Help {
     Write-Host "  build          Build MCUboot app by default; use -target no_bootloader for direct app without bootloader."
     Write-Host "  menuconfig     Open Zephyr menuconfig for the configured build directory."
     Write-Host "  flash          Flash MCUboot app by default; use -target no_bootloader for direct app without bootloader."
-    Write-Host "  ota            Upload and test an MCUboot OTA image."
-    Write-Host "  reset          Reset device by mcumgr."
-    Write-Host "  image_list     List MCUboot images by mcumgr."
-    Write-Host "  image_confirm  Confirm the active MCUboot image."
+    Write-Host "  ota            Upload and test an MCUboot OTA image without resetting."
+    Write-Host "  image upload   Upload an MCUboot image."
+    Write-Host "  image test     Mark an image hash for test boot."
+    Write-Host "  image reset    Reset the device by mcumgr."
+    Write-Host "  image list     List MCUboot images by mcumgr."
+    Write-Host "  image confirm  Confirm the active MCUboot image."
     Write-Host ""
     Write-Host "Common options:"
     Write-Host "  -config <path> Use a project_config.json file."
@@ -104,6 +106,65 @@ function Convert-ArgumentsToSplat {
     return $splat
 }
 
+function Invoke-ImageCommand {
+    param([string[]]$Arguments)
+
+    $prefixArgs = @()
+    if ($Arguments.Count -ge 2 -and $Arguments[0] -eq "-config") {
+        $prefixArgs = @($Arguments[0], $Arguments[1])
+        if ($Arguments.Count -gt 2) {
+            $Arguments = @($Arguments[2..($Arguments.Count - 1)])
+        } else {
+            $Arguments = @()
+        }
+    }
+
+    if ($Arguments.Count -eq 0) {
+        Write-Error "Missing image command. Use: image upload|test|reset|list|confirm"
+        exit 1
+    }
+
+    $imageCommand = [string]$Arguments[0]
+    $imageArgs = @($prefixArgs)
+    if ($Arguments.Count -gt 1) {
+        $imageArgs += @($Arguments[1..($Arguments.Count - 1)])
+    }
+
+    switch -CaseSensitive ($imageCommand) {
+        "upload" {
+            Invoke-WorkflowCommand -ScriptName "image_upload.ps1" -Arguments $imageArgs -OptionNames @("config", "board", "address", "port", "conn_type", "mcu_mgr", "image_path") -SwitchNames @("dry_run", "version")
+        }
+        "test" {
+            if ($imageArgs.Count -gt $prefixArgs.Count -and -not ([string]$imageArgs[$prefixArgs.Count]).StartsWith("-")) {
+                $hash = [string]$imageArgs[$prefixArgs.Count]
+                $beforeHash = @()
+                if ($prefixArgs.Count -gt 0) {
+                    $beforeHash = @($imageArgs[0..($prefixArgs.Count - 1)])
+                }
+                $afterHash = @()
+                if ($imageArgs.Count -gt ($prefixArgs.Count + 1)) {
+                    $afterHash = @($imageArgs[($prefixArgs.Count + 1)..($imageArgs.Count - 1)])
+                }
+                $imageArgs = @($beforeHash) + @("-hash", $hash) + @($afterHash)
+            }
+            Invoke-WorkflowCommand -ScriptName "image_test.ps1" -Arguments $imageArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr", "hash") -SwitchNames @("dry_run", "version")
+        }
+        "reset" {
+            Invoke-WorkflowCommand -ScriptName "reset.ps1" -Arguments $imageArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
+        }
+        "list" {
+            Invoke-WorkflowCommand -ScriptName "image_list.ps1" -Arguments $imageArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
+        }
+        "confirm" {
+            Invoke-WorkflowCommand -ScriptName "image_confirm.ps1" -Arguments $imageArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
+        }
+        default {
+            Write-Error "Unknown image command: $imageCommand. Use: image upload|test|reset|list|confirm"
+            exit 1
+        }
+    }
+}
+
 $rawArgs = @($args)
 
 if ($rawArgs.Count -eq 0) {
@@ -138,16 +199,10 @@ switch -CaseSensitive ($command) {
         Invoke-WorkflowCommand -ScriptName "flash.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "runner", "target", "connection", "programmer") -SwitchNames @("include_bootloader", "skip_option_bytes", "dry_run", "version")
     }
     "ota" {
-        Invoke-WorkflowCommand -ScriptName "ota.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "address", "port", "conn_type", "mcu_mgr", "image_path") -SwitchNames @("skip_upload", "skip_reset", "dry_run", "raw_upload_output", "version")
+        Invoke-WorkflowCommand -ScriptName "ota.ps1" -Arguments $remainingArgs -OptionNames @("config", "board", "address", "port", "conn_type", "mcu_mgr", "image_path") -SwitchNames @("dry_run", "version")
     }
-    "reset" {
-        Invoke-WorkflowCommand -ScriptName "reset.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
-    }
-    "image_list" {
-        Invoke-WorkflowCommand -ScriptName "image_list.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("version")
-    }
-    "image_confirm" {
-        Invoke-WorkflowCommand -ScriptName "image_comfirm.ps1" -Arguments $remainingArgs -OptionNames @("config", "address", "port", "conn_type", "mcu_mgr") -SwitchNames @("dry_run", "version")
+    "image" {
+        Invoke-ImageCommand -Arguments $remainingArgs
     }
     default {
         Write-Error "Unknown workflow command: $command"

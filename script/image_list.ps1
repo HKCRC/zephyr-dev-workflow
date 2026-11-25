@@ -1,14 +1,15 @@
-# Version: 4.0.0
+# Version: 5.0.0
 param(
     [string]$config = "",
     [string]$address = "",
     [Nullable[int]]$port = $null,
     [string]$conn_type = "",
     [string]$mcu_mgr = "",
+    [switch]$dry_run,
     [switch]$version
 )
 
-$ScriptVersion = "4.0.0"
+$ScriptVersion = "5.0.0"
 if ($version) {
     Write-Host "image_list.ps1 version $ScriptVersion"
     exit 0
@@ -25,5 +26,9 @@ $mcu_mgr = Use-ConfigValue $mcu_mgr $projectConfig.McuMgr
 $connString = "$address`:$port"
 
 Write-Host "Querying MCUboot image list from $connString..."
+if ($dry_run) {
+    Write-Host "$mcu_mgr --conntype $conn_type --connstring $connString image list"
+    exit 0
+}
 & $mcu_mgr --conntype $conn_type --connstring $connString image list
 exit $LASTEXITCODE

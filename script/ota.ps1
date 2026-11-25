@@ -1,4 +1,4 @@
-# Version: 4.0.0
+# Version: 5.0.0
 param(
     [string]$config = "",
     [string]$board = "",
@@ -7,14 +7,11 @@ param(
     [string]$conn_type = "",
     [string]$mcu_mgr = "",
     [string]$image_path = "",
-    [switch]$skip_upload,
-    [switch]$skip_reset,
     [switch]$dry_run,
-    [switch]$raw_upload_output,
     [switch]$version
 )
 
-$ScriptVersion = "4.0.0"
+$ScriptVersion = "5.0.0"
 if ($version) {
     Write-Host "ota.ps1 version $ScriptVersion"
     exit 0
@@ -81,20 +78,9 @@ function Invoke-McuMgrUpload {
         return
     }
 
-    if ($raw_upload_output) {
-        & $mcu_mgr @Arguments
-        if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-        }
-        return
-    }
-
-    $output = & $mcu_mgr @Arguments 2>&1
-    $exitCode = $LASTEXITCODE
-
-    if ($exitCode -ne 0) {
-        $output | ForEach-Object { Write-Host $_ }
-        exit $exitCode
+    & $mcu_mgr @Arguments
+    if ($LASTEXITCODE -ne 0) {
+        exit $LASTEXITCODE
     }
 
     Write-Host "Upload complete."
@@ -146,15 +132,14 @@ if ([string]::IsNullOrWhiteSpace($image_path)) {
     Require-File $image_path
 }
 
-if (-not $skip_upload) {
-    Write-Host "Uploading signed image to slot1..."
-    Invoke-McuMgrUpload @("--conntype", $conn_type, "--connstring", $connString, "image", "upload", $image_path)
-}
+Write-Host "Uploading signed image to slot1..."
+Invoke-McuMgrUpload @("--conntype", $conn_type, "--connstring", $connString, "image", "upload", $image_path)
 
 Write-Host "Reading image list..."
 $imageList = Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "image", "list")
 if ($dry_run) {
-    Write-Host "Dry run stops before parsing slot1 image hash."
+    Write-Host "$mcu_mgr --conntype $conn_type --connstring $connString image test <slot1-hash>"
+    Write-Host "Dry run stops before parsing the actual slot1 image hash. Device would not be reset."
     exit 0
 }
 
@@ -164,23 +149,12 @@ if ([string]::IsNullOrWhiteSpace($slot1Hash)) {
     exit 1
 }
 
-if ($skip_upload) {
-    Write-Host "Current slot1 firmware hash: $slot1Hash"
-} else {
-    Write-Host "OTA update firmware hash: $slot1Hash"
-}
+Write-Host "OTA update firmware hash: $slot1Hash"
 
 Write-Host "Marking slot1 image as test upgrade: $slot1Hash"
 Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "image", "test", $slot1Hash) | Out-Null
 
-if ($skip_reset) {
-    Write-Host "OTA image marked as test upgrade. Reset skipped."
-    exit 0
-}
-
-Write-Host "Resetting device to switch to the new firmware..."
-Invoke-McuMgr @("--conntype", $conn_type, "--connstring", $connString, "reset") | Out-Null
-
-Write-Host "OTA requested. After the new firmware boots and passes validation, run:"
-Write-Host "  .\dev.ps1 image_confirm -address $address -port $port"
+Write-Host "OTA image uploaded and marked for test boot. Device was not reset."
+Write-Host "To boot the new firmware, run:"
+Write-Host "  .\dev.ps1 image reset -address $address -port $port"
 exit 0
